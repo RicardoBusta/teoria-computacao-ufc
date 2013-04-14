@@ -20,7 +20,8 @@ public:
 private:
     Ui::MainWindow *ui;
 public slots:
-    void compile();
+    void process_text();
+    void start_machine();
 };
 
 #endif // MAINWINDOW_H

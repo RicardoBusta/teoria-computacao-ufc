@@ -20,7 +20,8 @@ MainWindow::MainWindow(QWidget *parent) :
     ui->machine_debug->setFont(io_font::input);
 
     new TMSyntax(ui->machine_input);
-    connect(ui->machine_input, SIGNAL(textChanged()), this, SLOT(compile()));
+    connect(ui->machine_input, SIGNAL(textChanged()), this, SLOT(process_text()));
+    connect(ui->pushButton,SIGNAL(clicked()),this,SLOT(start_machine()));
 }
 
 MainWindow::~MainWindow()
@@ -28,7 +29,7 @@ MainWindow::~MainWindow()
     delete ui;
 }
 
-void MainWindow::compile()
+void MainWindow::process_text()
 {
     TMState::clear();
     TMCharacter::clear();
@@ -103,4 +104,9 @@ void MainWindow::compile()
     }
     state_str += "}";
     ui->machine_debug->append(state_str);
+}
+
+void MainWindow::start_machine()
+{
+    ui->machine_programming->setEnabled(!ui->machine_programming->isEnabled());
 }
