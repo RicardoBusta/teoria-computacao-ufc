@@ -3,6 +3,8 @@
 
 #include <QMainWindow>
 
+#include "tmstate.h"
+
 namespace Ui {
 class MainWindow;
 }
@@ -17,8 +19,6 @@ public:
     
 private:
     Ui::MainWindow *ui;
-
-    QRegExp ex_valid_program;
 public slots:
     void compile();
 };
