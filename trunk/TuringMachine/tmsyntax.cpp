@@ -12,6 +12,7 @@ TMSyntax::TMSyntax(QTextEdit *parent) :
     //Set Parent
     parent->clear();
     parent->setFont(QFont("consolas",15));
+    parent->setLineWrapMode(QTextEdit::NoWrap);
 
     // White
     //format_white.setFont(font);
@@ -32,7 +33,7 @@ TMSyntax::TMSyntax(QTextEdit *parent) :
     format_command.setForeground(QBrush(QColor(150,0,150)));
     //format_command.setFont(font);
 
-    ex_state = QRegExp("[a-zA-Z][a-zA-Z0-9]*");
+    ex_state = QRegExp("[a-zA-Z][a-zA-Z0-9_-]*");
     ex_alphabet = QRegExp("[a-zA-Z#@]");
     ex_command = QRegExp("[a-zA-Z#><]");
 
@@ -41,10 +42,7 @@ TMSyntax::TMSyntax(QTextEdit *parent) :
                       +"(\\s+)"+ex_state.pattern()
                       +"(\\s+)"+ex_command.pattern()+"(\\s*)$");
 
-    ex_comment = QRegExp("^\
-                         ((//(.*))\
-                         |(/\\*(.*)\\*/)\
-                         |(#(.*)))$");
+    ex_comment = QRegExp("^((//(.*))|(/\\*(.*)\\*/)|(#(.*)))$");
     ex_white = QRegExp("^(\\s*)$");
 }
 
@@ -90,7 +88,12 @@ void TMSyntax::highlightBlock(const QString &text)
 
 QRegExp TMSyntax::get_valid_exp()
 {
-    return QRegExp("^\
-                   ((\\s*)\\n)*\
-                   $");
+    return QRegExp("^(((\\s*)"
+                   +ex_state.pattern()+"(\\s+)"
+                   +ex_alphabet.pattern()+"(\\s+)"
+                   +ex_state.pattern()+"(\\s+)"
+                   +ex_command.pattern()+"(\\s*))"
+                   +"|(((//(.*)))|(/\\*(.*)\\*/)|(#(.*)))"
+                   +"|(\\s*))*"
+                   +"$");
 }
