@@ -4,7 +4,7 @@
 #include <QString>
 #include <QMap>
 
-enum TMCOM_TYPE{TMCOM_LEFT,TMCOM_RIGHT,TMCOM_WRITE,TMCOM_ERROR};
+enum TMCOM_TYPE{TMCOM_LEFT,TMCOM_RIGHT,TMCOM_WRITE,TMCOM_ERROR,TMCOM_NULL};
 
 class TMCommand
 {
@@ -14,12 +14,19 @@ public:
     TMCOM_TYPE type;
     QString write_char;
     QString goto_state;
+    int line_defined;
 
-    void set(TMCOM_TYPE type, QString write_char, QString goto_state);
+    void set(TMCOM_TYPE type, QString write_char, QString goto_state, int line_defined);
 
     static QMap< QString,QMap<QString,TMCommand> > map;
+
     static void clear();
-    static bool add(QString from_state, QString from_character, QString goto_state, QString goto_command);
+    static void queue_add(QStringList s_list, int line_defined);
+    static int add();
+
+private:
+    static QList<QStringList> queue_list;
+    static QList<int> queue_line;
 };
 
 #endif // TMCOMMAND_H
