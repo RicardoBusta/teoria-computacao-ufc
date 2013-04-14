@@ -36,7 +36,6 @@ TMSyntax::TMSyntax(QTextEdit *parent) :
 
 void TMSyntax::highlightBlock(const QString &text)
 {
-
     /**/ if(io_ex::blank.exactMatch(text)){
         setFormat(0,text.size(),io_format::blank);
     }

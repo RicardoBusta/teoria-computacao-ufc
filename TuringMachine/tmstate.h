@@ -14,6 +14,7 @@ public:
     bool halt;
     QString name;
 
+    static QString first_state;
     static QMap<QString,TMState> map;
     static void clear();
     static void add(QString name);
