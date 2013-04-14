@@ -6,94 +6,92 @@
 TMSyntax::TMSyntax(QTextEdit *parent) :
     QSyntaxHighlighter(parent)
 {
-    // Font
-    font = QFont("consolas",15);
-
-    //Set Parent
-    parent->clear();
-    parent->setFont(QFont("consolas",15));
-    parent->setLineWrapMode(QTextEdit::NoWrap);
+    QColor comment_color = QColor(0,150,0);
+    QColor state_color = QColor(0,0,150);
+    QColor error_color = QColor(255,0,0);
+    QColor character_color = QColor(0,150,150);
+    QColor command_color = QColor(150,0,150);
 
     // White
-    //format_white.setFont(font);
     // Comment
-    format_comment.setForeground(QBrush(QColor(0,150,0)));
-    //format_comment.setFont(font);
+    io_format::comment.setForeground(QBrush(comment_color));
     // Error
-    format_error.setUnderlineColor(QColor(255,0,0));
-    //format_error.setFont(font);
-    format_error.setUnderlineStyle(QTextCharFormat::WaveUnderline);
+    io_format::error.setUnderlineColor(error_color);
+    io_format::error.setUnderlineStyle(QTextCharFormat::WaveUnderline);
     // State
-    format_state.setForeground(QBrush(QColor(0,0,150)));
-    //format_state.setFont(font);
+    io_format::state.setForeground(QBrush(state_color));
+    io_format::state.setFontItalic(true);
+
+    io_format::state_spec.setForeground(QBrush(state_color));
+    io_format::state_spec.setFontWeight(99);
     // Character
-    format_character.setForeground(QBrush(QColor(0,150,150)));
-    //format_character.setFont(font);
+    io_format::character.setForeground(QBrush(character_color));
+
+    io_format::character_spec.setForeground(QBrush(character_color));
     // Command
-    format_command.setForeground(QBrush(QColor(150,0,150)));
-    //format_command.setFont(font);
+    io_format::command = io_format::character;
 
-    ex_state = QRegExp("[a-zA-Z][a-zA-Z0-9_-]*");
-    ex_alphabet = QRegExp("[a-zA-Z#@]");
-    ex_command = QRegExp("[a-zA-Z#><]");
-
-    ex_line = QRegExp("^(\\s*)"+ex_state.pattern()
-                      +"(\\s+)"+ex_alphabet.pattern()
-                      +"(\\s+)"+ex_state.pattern()
-                      +"(\\s+)"+ex_command.pattern()+"(\\s*)$");
-
-    ex_comment = QRegExp("^((//(.*))|(/\\*(.*)\\*/)|(#(.*)))$");
-    ex_white = QRegExp("^(\\s*)$");
+    io_format::command_spec.setForeground(QBrush(command_color));
 }
 
 void TMSyntax::highlightBlock(const QString &text)
 {
 
-    /**/ if(ex_white.exactMatch(text)){
-        setFormat(0,text.size(),format_white);
+    /**/ if(io_ex::blank.exactMatch(text)){
+        setFormat(0,text.size(),io_format::blank);
     }
-    else if(ex_comment.exactMatch(text)){
-        setFormat(0,text.size(),format_comment);
+    else if(io_ex::comment.exactMatch(text)){
+        setFormat(0,text.size(),io_format::comment);
     }
-    else if(ex_line.exactMatch(text)){
+    else if(io_ex::line.exactMatch(text)){
+        //STATE
         int pos =0;
-        setFormat(0,text.size(),format_white);
-        pos = ex_state.indexIn(text,pos);
-        setFormat(pos,ex_state.matchedLength(),format_state);
-        pos += ex_state.matchedLength();
-        pos = ex_alphabet.indexIn(text,pos);
-        setFormat(pos,ex_alphabet.matchedLength(),format_character);
-        pos += ex_alphabet.matchedLength();
-        pos = ex_state.indexIn(text,pos);
-        setFormat(pos,ex_state.matchedLength(),format_state);
-        pos += ex_state.matchedLength();
-        pos = ex_command.indexIn(text,pos);
-        setFormat(pos,ex_command.matchedLength(),format_command);
+        pos = io_ex::state.indexIn(text,pos);
+        if(io_ex::state_spec.exactMatch(text.mid(pos,io_ex::state.matchedLength()))){
+            setFormat(pos,io_ex::state.matchedLength(),io_format::state_spec);
+        }else{
+            setFormat(pos,io_ex::state.matchedLength(),io_format::state);
+        }
+        pos += io_ex::state.matchedLength();
+
+        //CHARACTER
+        pos = io_ex::character.indexIn(text,pos);
+        if(io_ex::character_spec.exactMatch(text.mid(pos,io_ex::character.matchedLength()))){
+            setFormat(pos,io_ex::character.matchedLength(),io_format::character_spec);
+        }else{
+            setFormat(pos,io_ex::character.matchedLength(),io_format::character);
+        }
+        pos += io_ex::character.matchedLength();
+
+        //STATE
+        pos = io_ex::state.indexIn(text,pos);
+        if(io_ex::state_spec.exactMatch(text.mid(pos,io_ex::state.matchedLength()))){
+            setFormat(pos,io_ex::state.matchedLength(),io_format::state_spec);
+        }else{
+            setFormat(pos,io_ex::state.matchedLength(),io_format::state);
+        }
+        pos += io_ex::state.matchedLength();
+
+        //COMMAND
+        pos = io_ex::command.indexIn(text,pos);
+        if(io_ex::command_spec.exactMatch(text.mid(pos,io_ex::command.matchedLength()))){
+            setFormat(pos,io_ex::command.matchedLength(),io_format::command_spec);
+        }else{
+            setFormat(pos,io_ex::command.matchedLength(),io_format::command);
+        }
     }
     else{
-        setFormat(0,text.size(),format_error);
+        setFormat(0,text.size(),io_format::error);
     }
     //    int pos = 0;
-    //    pos = ex_word.indexIn(text,pos);
+    //    pos = ex::word.indexIn(text,pos);
     //    if(pos >= 0){
-    //        if(ex_state.exactMatch(text.mid(pos,ex_word.matchedLength()))){
-    //            setFormat(pos, ex_state.matchedLength(), format_state);
+    //        if(ex::state.exactMatch(text.mid(pos,ex::word.matchedLength()))){
+    //            setFormat(pos, ex::state.matchedLength(), io_format::state);
 
     //        }else{
 
     //        }
     //    }
 
-}
-
-QRegExp TMSyntax::get_valid_exp()
-{
-    return QRegExp("^(((\\s*)"
-                   +ex_state.pattern()+"(\\s+)"
-                   +ex_alphabet.pattern()+"(\\s+)"
-                   +ex_state.pattern()+"(\\s+)"
-                   +ex_command.pattern()+"(\\s*))"
-                   +"|(((//(.*)))|(/\\*(.*)\\*/)|(#(.*)))"
-                   +"|(\\s*))*"
-                   +"$");
 }
