@@ -36,13 +36,13 @@ TMSyntax::TMSyntax(QTextEdit *parent) :
 
 void TMSyntax::highlightBlock(const QString &text)
 {
-    /**/ if(io_ex::blank.exactMatch(text)){
+    /**/ if(io_ex::white_line.exactMatch(text)){
         setFormat(0,text.size(),io_format::blank);
     }
     else if(io_ex::comment.exactMatch(text)){
         setFormat(0,text.size(),io_format::comment);
     }
-    else if(io_ex::line.exactMatch(text)){
+    else if(io_ex::valid_line.exactMatch(text)){
         //STATE
         int pos =0;
         pos = io_ex::state.indexIn(text,pos);

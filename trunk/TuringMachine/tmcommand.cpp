@@ -9,6 +9,7 @@
 QMap< QString,QMap<QString,TMCommand> > TMCommand::map;
 QList<QStringList> TMCommand::queue_list;
 QList<int> TMCommand::queue_line;
+int TMCommand::line_redefined = -1;
 
 TMCommand::TMCommand()
 {
@@ -33,9 +34,9 @@ void TMCommand::clear()
         foreach(TMCharacter c,TMCharacter::map){
             map[s.name].insert(c.name,TMCommand());
             if(c.name=="@"){
-                map[s.name][c.name].set(TMCOM_RIGHT,c.name,s.name,0);
+                map[s.name][c.name].set(TMCOM_RIGHT,c.name,s.name,-2);
             }else{
-                map[s.name][c.name].set(TMCOM_NULL,c.name,s.name,0);
+                map[s.name][c.name].set(TMCOM_NULL,c.name,s.name,-2);
             }
         }
     }
@@ -58,12 +59,13 @@ int TMCommand::add()
         }else{
             t = TMCOM_WRITE;
         }
-        qDebug() << queue_list.first()[0] << queue_list.first()[1]<< map[queue_list.first()[0]][queue_list.first()[1]].type;
-        qDebug() << queue_list.first()[0] << queue_list.first()[1]<< map[queue_list.first()[0]][queue_list.first()[1]].line_defined;
+//        qDebug() << queue_list.first()[0] << queue_list.first()[1]<< map[queue_list.first()[0]][queue_list.first()[1]].type;
+//        qDebug() << queue_list.first()[0] << queue_list.first()[1]<< map[queue_list.first()[0]][queue_list.first()[1]].line_defined;
         if(map[queue_list.first()[0]][queue_list.first()[1]].type==TMCOM_NULL){
             map[queue_list.first()[0]][queue_list.first()[1]].set(t,queue_list.first()[3],queue_list.first()[2],queue_line.first());
         }else{
             int res = map[queue_list.first()[0]][queue_list.first()[1]].line_defined;
+            line_redefined = queue_line.first();
             queue_list.clear();
             queue_line.clear();
             return res;

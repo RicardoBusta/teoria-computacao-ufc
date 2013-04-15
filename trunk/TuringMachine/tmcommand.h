@@ -24,6 +24,8 @@ public:
     static void queue_add(QStringList s_list, int line_defined);
     static int add();
 
+    static int line_redefined;
+
 private:
     static QList<QStringList> queue_list;
     static QList<int> queue_line;
