@@ -33,7 +33,7 @@ void MainWindow::process_text()
 {
     TMState::clear();
     TMCharacter::clear();
-    bool valid;
+    bool valid = true;
     bool first_defined = false;
     int errorline = -1;
     QString errorstring = "";
@@ -42,7 +42,7 @@ void MainWindow::process_text()
     QStringList text = ui->machine_input->toPlainText().split('\n');
     for(int i=0;i<text.size();i++){
         QString line = text.at(i);
-        if(io_ex::line.exactMatch(line)){
+        if(io_ex::valid_line.exactMatch(line)){
             QStringList arg = line.split(QRegExp("(\\s+)"));
             if(!first_defined){
                 first_defined = true;
@@ -55,7 +55,7 @@ void MainWindow::process_text()
                 TMCharacter::add(arg[3]);
             }
             TMCommand::queue_add(arg,i);
-        }else if(io_ex::blank.exactMatch(line) || io_ex::comment.exactMatch(line)){
+        }else if(io_ex::white_line.exactMatch(line) || io_ex::comment.exactMatch(line)){
             //ignore comments and white lines
         }else{
             valid = false;
@@ -66,44 +66,67 @@ void MainWindow::process_text()
     }
     TMCommand::clear();
     qDebug() << "\n\n\n\n\n\n\n\nclear" << "=========";
-        QMap<QString,TMCommand> m;
-        foreach(m,TMCommand::map){
-            foreach(TMCommand com, m){
-                qDebug()<<com.type<<com.goto_state<<com.write_char;
-            }
+    QMap<QString,TMCommand> m;
+    foreach(m,TMCommand::map){
+        foreach(TMCommand com, m){
+            qDebug()<<com.type<<com.goto_state<<com.write_char;
         }
+    }
 
     int def_line=-1;
-    if((def_line = TMCommand::add())>=0){
+    if((def_line = TMCommand::add())!=-1){
         valid = false;
-        errorline = def_line;
-        errorstring = QString("previously defined at line %1").arg(def_line);
+        errorline = TMCommand::line_redefined;
+        if(def_line!=-2){
+            errorstring = QString("previously defined at line %1").arg(def_line);
+        }else{
+            errorstring = QString("string predefined by machine");
+        }
     }
 
 
     //Start Debug Output
     ui->machine_debug->clear();
+    QString outstr = "";
+
     if (valid) {
-        ui->machine_debug->append("<font color='#0a0'><b>[valid]</b></font>");
+        outstr += "<font color='#0a0'><b>[valid]</b></font><br>";
     }else{
-        ui->machine_debug->append(QString("<font color='#a00'><b>[invalid:line %1] %2</b></font>").arg(errorline).arg(errorstring));
+        outstr += QString("<font color='#a00'><b>[invalid:line %1] %2</b></font><br>").arg(errorline).arg(errorstring);
     }
 
-    QString alphabet_str = "";
-    alphabet_str += "Σ = { ";
-    foreach(TMCharacter character,TMCharacter::map){
-        alphabet_str += character.name+", ";
-    }
-    alphabet_str += "}";
-    ui->machine_debug->append(alphabet_str);
+    outstr += "M(Machine) = { Q, &Gamma;, b, &Sigma;, &delta;, s, F }<br>";
 
-    QString state_str = "";
-    state_str += "Q = { ";
+    outstr += "Q(Machine States) = { ";
     foreach(TMState state,TMState::map){
-        state_str += (state.name+", ");
+        outstr += (state.name+", ");
     }
-    state_str += "}";
-    ui->machine_debug->append(state_str);
+    outstr += "}<br>";
+
+    outstr += "&Gamma;(Machine Alphabet) = { ";
+    foreach(TMCharacter character,TMCharacter::map){
+        outstr += character.name+", ";
+    }
+    outstr += "}<br>";
+
+    outstr += "b(Blank Character) = { #, }<br>";
+
+    outstr += "&Sigma;(Input Alphabet) = { ";
+    foreach(TMCharacter character,TMCharacter::map){
+        if(character.name!="#" and character.name!="@"){
+            outstr += character.name+", ";
+        }
+    }
+    outstr += "}<br>";
+
+    outstr += "&delta;(Transition Function) = <i>see the table</i><br>";
+
+    outstr += QString("s(Initial State) = { %1, }<br>").arg(TMState::first_state);
+
+    outstr += QString("F(Final States) = { h, }<br>");
+
+
+    ui->machine_debug->setHtml(outstr);
 }
 
 void MainWindow::start_machine()
