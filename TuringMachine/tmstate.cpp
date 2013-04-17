@@ -1,9 +1,11 @@
 #include "tmstate.h"
 
+#include "exnamespace.h"
+
 QMap<QString,TMState> TMState::map;
 QString TMState::first_state;
 
-TMState::TMState(QString name, bool halt)
+TMState::TMState(const QString name, const bool halt)
 {
     this->name = name;
     this->halt = halt;
@@ -12,12 +14,12 @@ TMState::TMState(QString name, bool halt)
 void TMState::clear()
 {
     map.clear();
-    map.insert("h",TMState("h",true));
-    map.insert("e",TMState("e",true));
-    first_state = "h";
+    map.insert(io_ex::halt_state,TMState(io_ex::halt_state,true));
+    map.insert(io_ex::error_state,TMState(io_ex::error_state,true));
+    first_state = io_ex::halt_state;
 }
 
-void TMState::add(QString name)
+void TMState::add(const QString name)
 {
     if(!map.contains(name)){
         map.insert(name,TMState(name));

@@ -13,7 +13,7 @@ public:
 
     static QMap<QString,TMCharacter> map;
     static void clear();
-    static void add(QString name);
+    static void add(const QString name);
 };
 
 #endif // TMCHARACTER_H

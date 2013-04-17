@@ -7,7 +7,7 @@
 class TMState
 {
 private:
-    TMState(QString name, bool halt=false);
+    TMState(const QString name, const bool halt=false);
 public:
 
 
@@ -17,7 +17,7 @@ public:
     static QString first_state;
     static QMap<QString,TMState> map;
     static void clear();
-    static void add(QString name);
+    static void add(const QString name);
 };
 
 #endif // TMSTATE_H
