@@ -1,5 +1,6 @@
 #include "tmcharacter.h"
 
+#include "exnamespace.h"
 
 QMap<QString,TMCharacter> TMCharacter::map;
 
@@ -12,11 +13,11 @@ void TMCharacter::clear()
 {
     map.clear();
     //Must keep default characters on
-    map.insert("@",TMCharacter("@"));
-    map.insert("#",TMCharacter("#"));
+    map.insert(io_ex::begin_character,TMCharacter(io_ex::begin_character));
+    map.insert(io_ex::blank_character,TMCharacter(io_ex::blank_character));
 }
 
-void TMCharacter::add(QString name)
+void TMCharacter::add(const QString name)
 {
     if(!map.contains(name)){
         map.insert(name,TMCharacter(name));

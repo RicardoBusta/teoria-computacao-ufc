@@ -3,6 +3,8 @@
 #include <QDebug>
 #include <QTextEdit>
 
+#include "exnamespace.h"
+
 TMSyntax::TMSyntax(QTextEdit *parent) :
     QSyntaxHighlighter(parent)
 {
@@ -35,7 +37,7 @@ TMSyntax::TMSyntax(QTextEdit *parent) :
 }
 
 void TMSyntax::highlightBlock(const QString &text)
-{
+{    
     /**/ if(io_ex::white_line.exactMatch(text)){
         setFormat(0,text.size(),io_format::blank);
     }

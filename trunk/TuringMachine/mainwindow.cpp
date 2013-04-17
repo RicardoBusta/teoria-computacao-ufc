@@ -4,9 +4,6 @@
 #include <QDebug>
 
 #include "tmsyntax.h"
-#include "tmstate.h"
-#include "tmcharacter.h"
-#include "tmcommand.h"
 
 MainWindow::MainWindow(QWidget *parent) :
     QMainWindow(parent),
@@ -21,7 +18,10 @@ MainWindow::MainWindow(QWidget *parent) :
 
     new TMSyntax(ui->machine_input);
     connect(ui->machine_input, SIGNAL(textChanged()), this, SLOT(process_text()));
-    connect(ui->pushButton,SIGNAL(clicked()),this,SLOT(start_machine()));
+    connect(ui->machine_start,SIGNAL(clicked()),this,SLOT(start_machine()));
+    connect(ui->machine_step,SIGNAL(clicked()),this,SLOT(step_machine()));
+    connect(&tmexec,SIGNAL(current_state(QString)),ui->label,SLOT(setText(QString)));
+    connect(&tmexec,SIGNAL(current_tape(QString)),ui->label_2,SLOT(setText(QString)));
 }
 
 MainWindow::~MainWindow()
@@ -51,7 +51,7 @@ void MainWindow::process_text()
             TMState::add(arg[0]);
             TMCharacter::add(arg[1]);
             TMState::add(arg[2]);
-            if(arg[3]!="<" and arg[3]!=">"){
+            if(arg[3]!=io_ex::left_command and arg[3]!=io_ex::right_command){
                 TMCharacter::add(arg[3]);
             }
             TMCommand::queue_add(arg,i);
@@ -109,11 +109,11 @@ void MainWindow::process_text()
     }
     outstr += "}<br>";
 
-    outstr += "b(Blank Character) = { #, }<br>";
+    outstr += "b(Blank Character) = { "+io_ex::blank_character+", }<br>";
 
     outstr += "&Sigma;(Input Alphabet) = { ";
     foreach(TMCharacter character,TMCharacter::map){
-        if(character.name!="#" and character.name!="@"){
+        if(character.name!=io_ex::blank_character and character.name!=io_ex::begin_character){
             outstr += character.name+", ";
         }
     }
@@ -123,7 +123,7 @@ void MainWindow::process_text()
 
     outstr += QString("s(Initial State) = { %1, }<br>").arg(TMState::first_state);
 
-    outstr += QString("F(Final States) = { h, }<br>");
+    outstr += QString("F(Final States) = { "+io_ex::halt_state+", }<br>");
 
 
     ui->machine_debug->setHtml(outstr);
@@ -131,5 +131,13 @@ void MainWindow::process_text()
 
 void MainWindow::start_machine()
 {
-    ui->machine_programming->setEnabled(!ui->machine_programming->isEnabled());
+    //ui->machine_input->setText("//R machine\nq0 # q1 >\nq1 a q1 >\nq1 b q1 >\nq1 # HALT #");
+    //ui->machine_tape->setText("ababab");
+    //ui->machine_programming->setEnabled(!ui->machine_programming->isEnabled());
+    tmexec.begin(ui->machine_tape->text());
+}
+
+void MainWindow::step_machine()
+{
+    tmexec.step();
 }

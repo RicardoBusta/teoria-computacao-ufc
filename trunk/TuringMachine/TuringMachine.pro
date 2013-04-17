@@ -17,13 +17,17 @@ SOURCES += main.cpp\
     tmsyntax.cpp \
     tmstate.cpp \
     tmcharacter.cpp \
-    tmcommand.cpp
+    tmcommand.cpp \
+    tmexecution.cpp \
+    turingmachine.cpp
 
 HEADERS  += mainwindow.h \
     tmsyntax.h \
     exnamespace.h \
     tmstate.h \
     tmcharacter.h \
-    tmcommand.h
+    tmcommand.h \
+    tmexecution.h \
+    turingmachine.h
 
 FORMS    += mainwindow.ui

@@ -4,8 +4,6 @@
 #include <QSyntaxHighlighter>
 class QTextEdit;
 
-#include "exnamespace.h"
-
 class TMSyntax : public QSyntaxHighlighter
 {
     Q_OBJECT

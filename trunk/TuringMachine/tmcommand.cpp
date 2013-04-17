@@ -2,6 +2,7 @@
 
 #include "tmstate.h"
 #include "tmcharacter.h"
+#include "exnamespace.h"
 
 #include <QDebug>
 #include <QStringList>
@@ -13,11 +14,11 @@ int TMCommand::line_redefined = -1;
 
 TMCommand::TMCommand()
 {
-    this->type = TMCOM_NULL;
+    this->type = TMCOM_ERROR;
     line_defined = -1;
 }
 
-void TMCommand::set(TMCOM_TYPE type, QString write_char, QString goto_state, int line_defined)
+void TMCommand::set(const TMCOM_TYPE type, const QString write_char, const QString goto_state, const int line_defined)
 {
     this->type = type;
     this->write_char = write_char;
@@ -33,16 +34,16 @@ void TMCommand::clear()
         map.insert(s.name,QMap<QString,TMCommand>());
         foreach(TMCharacter c,TMCharacter::map){
             map[s.name].insert(c.name,TMCommand());
-            if(c.name=="@"){
+            if(c.name==io_ex::begin_character){
                 map[s.name][c.name].set(TMCOM_RIGHT,c.name,s.name,-2);
             }else{
-                map[s.name][c.name].set(TMCOM_NULL,c.name,s.name,-2);
+                map[s.name][c.name].set(TMCOM_ERROR,c.name,s.name,-2);
             }
         }
     }
 }
 
-void TMCommand::queue_add(QStringList s_list, int line_defined)
+void TMCommand::queue_add(const QStringList s_list, const int line_defined)
 {
     queue_list.push_back(s_list);
     queue_line.push_back(line_defined);
@@ -52,16 +53,14 @@ int TMCommand::add()
 {
     while(queue_list.size()>0){
         TMCOM_TYPE t;
-        if(queue_list.first()[3]==">"){
+        if(queue_list.first()[3]==io_ex::right_command){
             t = TMCOM_RIGHT;
-        }else if(queue_list.first()[3]=="<"){
+        }else if(queue_list.first()[3]==io_ex::left_command){
             t = TMCOM_LEFT;
         }else{
             t = TMCOM_WRITE;
         }
-//        qDebug() << queue_list.first()[0] << queue_list.first()[1]<< map[queue_list.first()[0]][queue_list.first()[1]].type;
-//        qDebug() << queue_list.first()[0] << queue_list.first()[1]<< map[queue_list.first()[0]][queue_list.first()[1]].line_defined;
-        if(map[queue_list.first()[0]][queue_list.first()[1]].type==TMCOM_NULL){
+        if(map[queue_list.first()[0]][queue_list.first()[1]].line_defined==-2){
             map[queue_list.first()[0]][queue_list.first()[1]].set(t,queue_list.first()[3],queue_list.first()[2],queue_line.first());
         }else{
             int res = map[queue_list.first()[0]][queue_list.first()[1]].line_defined;
@@ -74,4 +73,13 @@ int TMCommand::add()
         queue_line.pop_front();
     }
     return -1;
+}
+
+TMCommand TMCommand::operator =(TMCommand command)
+{
+    this->type = command.type;
+    this->write_char = command.write_char;
+    this->goto_state = command.goto_state;
+    this->line_defined = command.line_defined;
+    return *this;
 }
