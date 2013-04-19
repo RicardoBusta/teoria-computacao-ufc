@@ -15,19 +15,15 @@ TEMPLATE = app
 SOURCES += main.cpp\
         mainwindow.cpp \
     tmsyntax.cpp \
-    tmstate.cpp \
-    tmcharacter.cpp \
     tmcommand.cpp \
-    tmexecution.cpp \
-    turingmachine.cpp
+    turingmachine.cpp \
+    tmhistory.cpp
 
 HEADERS  += mainwindow.h \
     tmsyntax.h \
     exnamespace.h \
-    tmstate.h \
-    tmcharacter.h \
     tmcommand.h \
-    tmexecution.h \
-    turingmachine.h
+    turingmachine.h \
+    tmhistory.h
 
 FORMS    += mainwindow.ui
