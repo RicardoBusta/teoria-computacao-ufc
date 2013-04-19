@@ -13,6 +13,7 @@ TMSyntax::TMSyntax(QTextEdit *parent) :
     QColor error_color = QColor(255,0,0);
     QColor character_color = QColor(0,150,150);
     QColor command_color = QColor(150,0,150);
+    QColor option_color = QColor(250,0,150);
 
     // White
     // Comment
@@ -34,65 +35,82 @@ TMSyntax::TMSyntax(QTextEdit *parent) :
     io_format::command = io_format::character;
 
     io_format::command_spec.setForeground(QBrush(command_color));
+    // Option
+    io_format::option.setForeground(QBrush(option_color));
 }
+
+static QString token_name[] = {
+    "TOKEN_ERROR",
+    "TOKEN_STATE",
+    "TOKEN_STATE_SPEC",
+    "TOKEN_CHARACTER",
+    "TOKEN_CHARACTER_SPEC",
+    "TOKEN_COMMAND",
+    "TOKEN_COMMAND_SPEC"
+};
 
 void TMSyntax::highlightBlock(const QString &text)
-{    
-    /**/ if(io_ex::white_line.exactMatch(text)){
-        setFormat(0,text.size(),io_format::blank);
-    }
-    else if(io_ex::comment.exactMatch(text)){
-        setFormat(0,text.size(),io_format::comment);
-    }
-    else if(io_ex::valid_line.exactMatch(text)){
-        //STATE
-        int pos =0;
-        pos = io_ex::state.indexIn(text,pos);
-        if(io_ex::state_spec.exactMatch(text.mid(pos,io_ex::state.matchedLength()))){
-            setFormat(pos,io_ex::state.matchedLength(),io_format::state_spec);
-        }else{
-            setFormat(pos,io_ex::state.matchedLength(),io_format::state);
-        }
-        pos += io_ex::state.matchedLength();
-
-        //CHARACTER
-        pos = io_ex::character.indexIn(text,pos);
-        if(io_ex::character_spec.exactMatch(text.mid(pos,io_ex::character.matchedLength()))){
-            setFormat(pos,io_ex::character.matchedLength(),io_format::character_spec);
-        }else{
-            setFormat(pos,io_ex::character.matchedLength(),io_format::character);
-        }
-        pos += io_ex::character.matchedLength();
-
-        //STATE
-        pos = io_ex::state.indexIn(text,pos);
-        if(io_ex::state_spec.exactMatch(text.mid(pos,io_ex::state.matchedLength()))){
-            setFormat(pos,io_ex::state.matchedLength(),io_format::state_spec);
-        }else{
-            setFormat(pos,io_ex::state.matchedLength(),io_format::state);
-        }
-        pos += io_ex::state.matchedLength();
-
-        //COMMAND
-        pos = io_ex::command.indexIn(text,pos);
-        if(io_ex::command_spec.exactMatch(text.mid(pos,io_ex::command.matchedLength()))){
-            setFormat(pos,io_ex::command.matchedLength(),io_format::command_spec);
-        }else{
-            setFormat(pos,io_ex::command.matchedLength(),io_format::command);
-        }
-    }
-    else{
+{
+    if(previousBlockState()==1){
+        setCurrentBlockState(1);
         setFormat(0,text.size(),io_format::error);
+        return;
     }
-    //    int pos = 0;
-    //    pos = ex::word.indexIn(text,pos);
-    //    if(pos >= 0){
-    //        if(ex::state.exactMatch(text.mid(pos,ex::word.matchedLength()))){
-    //            setFormat(pos, ex::state.matchedLength(), io_format::state);
 
-    //        }else{
+    setCurrentBlockState(0);
+    switch(io_ex::line_type(text)){
 
-    //        }
-    //    }
+    case io_ex::LINE_OPTION:
+        setFormat(0,text.size(),io_format::option);
+        break;
 
+    case io_ex::LINE_VALID:
+        break_line_token(text);
+
+        qDebug() << "===";
+        qDebug() << text.mid(token_list[0].start,token_list[0].count) << token_list[0].start << token_list[0].count << token_name[token_list[0].type];
+        qDebug() << text.mid(token_list[1].start,token_list[1].count) << token_list[1].start << token_list[1].count << token_name[token_list[1].type];
+        qDebug() << text.mid(token_list[2].start,token_list[2].count) << token_list[2].start << token_list[2].count << token_name[token_list[2].type];
+        qDebug() << text.mid(token_list[3].start,token_list[3].count) << token_list[3].start << token_list[3].count << token_name[token_list[3].type];
+
+        if( token_list[0].type == io_ex::TOKEN_STATE_SPEC ){
+            setFormat(token_list[0].start, token_list[0].count, io_format::state_spec);
+        }else if( token_list[0].type == io_ex::TOKEN_STATE ){
+            setFormat(token_list[0].start,token_list[0].count,io_format::state);
+        }
+
+        if(token_list[1].type == io_ex::TOKEN_CHARACTER_SPEC){
+            setFormat(token_list[1].start,token_list[1].count,io_format::character_spec);
+        }else if(token_list[1].type == io_ex::TOKEN_CHARACTER){
+            setFormat(token_list[1].start,token_list[1].count,io_format::character);
+        }
+
+        if(token_list[2].type == io_ex::TOKEN_STATE_SPEC){
+            setFormat(token_list[2].start,token_list[2].count,io_format::state_spec);
+        }else if(token_list[2].type == io_ex::TOKEN_STATE){
+            setFormat(token_list[2].start,token_list[2].count,io_format::state);
+        }
+
+        if(token_list[3].type == io_ex::TOKEN_COMMAND_SPEC){
+            setFormat(token_list[3].start,token_list[3].count,io_format::command_spec);
+        }else if(token_list[3].type == io_ex::TOKEN_COMMAND){
+            setFormat(token_list[3].start,token_list[3].count,io_format::command);
+        }
+        break;
+
+    case io_ex::LINE_COMMENT:
+        setFormat(0,text.size(),io_format::comment);
+        break;
+
+    case io_ex::LINE_WHITE:
+        setFormat(0,text.size(),io_format::blank);
+        break;
+
+    case io_ex::LINE_ERROR:
+    default:
+        setFormat(0,text.size(),io_format::error);
+        setCurrentBlockState(1);
+        break;
+    }
 }
+
