@@ -9,6 +9,7 @@ TuringMachine::TuringMachine(QObject *parent) :
     QObject(parent)
 {
     max_step_number = 1000;
+    begin("");
 }
 
 //State
@@ -163,7 +164,7 @@ bool TuringMachine::step()
 
 void TuringMachine::back_step()
 {
-    if(!history.empty() && step_count>=0){
+    if(!history.empty() && step_count>0){
         state = history.last().state;
         tape = history.last().tape;
         header_index = history.last().head;
@@ -177,6 +178,7 @@ void TuringMachine::back_step()
     }
 }
 
+#define launch_error(e,s) valid=false;errorline=(e);errorstring=(s)
 
 void TuringMachine::process(const QString input)
 {
@@ -194,11 +196,33 @@ void TuringMachine::process(const QString input)
         switch(io_ex::line_type(line)){
 
         case io_ex::LINE_OPTION:
-
+            arg = line.split(QRegExp("(\\s+)"));
+            if(io_ex::name_option.exactMatch(arg[0])){
+                qDebug() << "name";
+                if(TuringMachine::machine_map.contains(arg[1])){
+                    launch_error(i,"this machine already exists");
+                    break;
+                }
+                machine_map.remove(this->name);
+                this->name = arg[1];
+                machine_map.insert(this->name,this);
+                machine_current = this->name;
+            }else if(io_ex::init_option.exactMatch(arg[0])){
+                if(first_defined){
+                    launch_error(i,"the first state was already defined")
+                }
+                first_defined=true;
+                state_first = arg[1];
+            }else if(io_ex::halt_option.exactMatch(arg[0])){
+                qDebug() << "halt";
+            }else{
+                launch_error(i,"unexistent option");
+            }
             break;
 
         case io_ex::LINE_VALID:
             arg = line.split(QRegExp("(\\s+)"));
+
             if(!first_defined){
                 first_defined = true;
                 state_first = arg[0];
@@ -219,10 +243,7 @@ void TuringMachine::process(const QString input)
 
         case io_ex::LINE_ERROR:
         default:
-            // In case of error, exit
-            valid = false;
-            errorline = i;
-            errorstring = "bad syntax";
+            launch_error(i,"bad syntax");
             break;
         }
 
@@ -248,10 +269,11 @@ void TuringMachine::process(const QString input)
     if (valid) {
         outstr += "<font color='#0a0'><b>[valid]</b></font><br>";
     }else{
-        outstr += QString("<font color='#a00'><b>[invalid:line %1] %2</b></font><br>").arg(errorline).arg(errorstring);
+        outstr += QString("<font color='#a00'><b>[invalid:line %1] %2</b></font>").arg(errorline).arg(errorstring);
     }
 
-    outstr += "M(Machine) = { Q, &Gamma;, b, &Sigma;, &delta;, s, F }<br>";
+    /*
+    outstr += "<br>M(Machine) = { Q, &Gamma;, b, &Sigma;, &delta;, s, F }<br>";
 
     outstr += "Q(Machine States) = { ";
     foreach(QString state,state_list){
@@ -280,6 +302,8 @@ void TuringMachine::process(const QString input)
     outstr += QString("s(Initial State) = { %1, }<br>").arg(state_first);
 
     outstr += QString("F(Final States) = { "+io_ex::halt_state+", }");
-
+*/
     emit current_description(outstr);
 }
+
+#undef launch_error
