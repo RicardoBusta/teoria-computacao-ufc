@@ -13,6 +13,8 @@ class TuringMachine : public QObject
 public:
     explicit TuringMachine(QObject *parent = 0);
 
+    QString name;
+
     QString tape;
     int header_index;
     int step_count;

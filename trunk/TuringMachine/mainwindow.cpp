@@ -28,9 +28,8 @@ MainWindow::MainWindow(QWidget *parent) :
   ui->label_current_step->setFont(io_font::input);
   ui->label_current_tape->setFont(io_font::input);
 
-  ui->machine_input->setText("//R machine\nq0 # q1 >\nq1 a q1 >\nq1 b q1 >\nq1 # HALT #");
+  ui->machine_input->setText("//R machine\nq0 # q1 >\nq1 a q1 >\nq1 b q1 >\nq1 # halt #");
   ui->machine_tape->setText("ababab");
-
 
   TuringMachine::machine_map.insert("M",new TuringMachine(this));
   TuringMachine::machine_current = "M";
@@ -66,10 +65,11 @@ void MainWindow::start_machine()
 void MainWindow::step_machine()
 {
   TuringMachine::machine_map[TuringMachine::machine_current]->step();
+  qDebug() << TuringMachine::machine_current;
 }
 
 void MainWindow::about_clicked()
 {
-    QMessageBox *about = new QMessageBox(QMessageBox::Information,"Sobre","Programa desenvolvido por Ricardo Bustamante",QMessageBox::NoButton,this);
+    QMessageBox *about = new QMessageBox(QMessageBox::Information,"Sobre","Programa desenvolvido por Ricardo Bustamante (ricardobqueiroz@gmail.com)\nCom auxilio de Vanessa Karla",QMessageBox::NoButton,this);
     about->exec();
 }
