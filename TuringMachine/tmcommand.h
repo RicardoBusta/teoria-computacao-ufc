@@ -18,16 +18,9 @@ public:
 
   void set(const TMCOM_TYPE type, const QString write_char, const QString goto_state, const int line_defined);
 
-  //static QMap< QString,QMap<QString,TMCommand> > map;
-
-  //static void clear();
-  //static void queue_add(const QStringList s_list, const int line_defined);
-  //static int add();
 
   TMCommand operator=(const TMCommand command);
 private:
-  //static QList<QStringList> queue_list;
-  //static QList<int> queue_line;
 };
 
 #endif // TMCOMMAND_H
