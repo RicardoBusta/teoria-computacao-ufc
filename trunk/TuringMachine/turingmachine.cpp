@@ -209,7 +209,7 @@ void TuringMachine::process(const QString input)
                 machine_current = this->name;
             }else if(io_ex::init_option.exactMatch(arg[0])){
                 if(first_defined){
-                    launch_error(i,"the first state was already defined")
+                    launch_error(i,"the first state was already defined");
                 }
                 first_defined=true;
                 state_first = arg[1];

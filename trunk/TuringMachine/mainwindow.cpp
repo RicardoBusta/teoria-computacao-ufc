@@ -6,11 +6,15 @@
 
 #include "tmsyntax.h"
 
+#include "tmguistate.h"
+
 MainWindow::MainWindow(QWidget *parent) :
   QMainWindow(parent),
   ui(new Ui::MainWindow)
 {
   ui->setupUi(this);
+
+  ui->verticalWidget->hide();
 
   this->setWindowTitle("Simulador de Maquina de Turing - by Ricardo Bustamante");
 
