@@ -96,11 +96,12 @@ void TuringMachine::character_add(const QString name)
 
 void TuringMachine::begin(const QString tape)
 {
+    history.clear();
     step_count=0;
-    this->tape = io_ex::begin_character+io_ex::blank_character+tape;
+    this->tape = io_ex::begin_character+tape;
     header_index = 1;
     state = state_first;
-    qDebug() << "machine built.\n execute for: "+io_ex::begin_character+io_ex::blank_character+tape;
+    qDebug() << "machine built.\n execute for: "+io_ex::begin_character+tape;
     emit current_tape(QString(this->tape).insert(header_index+1,"</b></font>").insert(header_index,"<font color='#f00'><b>"));
     emit current_state(state);
     emit current_step(QString::number(step_count));

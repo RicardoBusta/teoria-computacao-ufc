@@ -25,6 +25,7 @@ public slots:
   void process_text();
   void start_machine();
   void step_machine();
+  void show_log();
 
   void about_clicked();
 };

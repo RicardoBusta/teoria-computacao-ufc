@@ -11,6 +11,8 @@ class TMGUI : public QGraphicsView
 public:
     explicit TMGUI(QWidget *parent = 0);
     ~TMGUI();
+
+    void mousePressEvent(QMouseEvent *event);
 private:
 };
 

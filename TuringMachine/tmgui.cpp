@@ -5,6 +5,8 @@
 #include "tmguistate.h"
 #include "tmguiedge.h"
 
+#include <QDebug>
+
 TMGUI::TMGUI(QWidget *parent) :
     QGraphicsView(parent)
 {
@@ -26,4 +28,10 @@ TMGUI::TMGUI(QWidget *parent) :
 
 TMGUI::~TMGUI()
 {
+}
+
+void TMGUI::mousePressEvent(QMouseEvent *event)
+{
+    qDebug() << "gui pressed";
+    QGraphicsView::mousePressEvent(event);
 }
