@@ -50,6 +50,7 @@ MainWindow::MainWindow(QWidget *parent) :
   connect(TuringMachine::machine_map[TuringMachine::machine_current],SIGNAL(current_description(QString)),ui->machine_debug,SLOT(setText(QString)));
 
   connect(ui->actionAbout,SIGNAL(triggered()),this,SLOT(about_clicked()));
+  connect(ui->machine_log,SIGNAL(clicked()),this,SLOT(show_log()));
 }
 
 MainWindow::~MainWindow()
@@ -71,6 +72,16 @@ void MainWindow::step_machine()
 {
   TuringMachine::machine_map[TuringMachine::machine_current]->step();
   qDebug() << TuringMachine::machine_current;
+}
+
+void MainWindow::show_log()
+{
+    QString out;
+    foreach(TMHistory h,TuringMachine::machine_map[TuringMachine::machine_current]->history){
+        out.append(h.tape.insert(h.head+1,"</b></font>").insert(h.head,"<font color='#f00'><b>"));
+        out.append("<br>");
+    }
+    ui->label_current_tape->setText(out);
 }
 
 void MainWindow::about_clicked()

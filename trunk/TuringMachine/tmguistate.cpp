@@ -54,6 +54,11 @@ QVariant TMGUIState::itemChange(QGraphicsItem::GraphicsItemChange change, const 
     return QGraphicsItem::itemChange(change, value);
 }
 
+void TMGUIState::mousePressEvent(QGraphicsSceneMouseEvent *e)
+{
+        qDebug() << "node pressed";
+}
+
 QRectF TMGUIState::boundingRect() const
 {
     return QRectF(-50,-50,100,100);

@@ -18,7 +18,7 @@ public:
     TMGUI *tmgui;
 
     static QList<TMGUIState*> state_list;
-    //    void mousePressEvent(QGraphicsSceneMouseEvent *e);
+        void mousePressEvent(QGraphicsSceneMouseEvent *e);
     //    void mouseReleaseEvent(QGraphicsSceneMouseEvent *e);
 signals:
 
