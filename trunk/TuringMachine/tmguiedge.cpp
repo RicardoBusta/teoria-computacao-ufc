@@ -2,12 +2,12 @@
 
 #include "tmguistate.h"
 
- QList<TMGUIEdge*> TMGUIEdge::list;
+ QList<TMGUIEdge*> TMGUIEdge::edge_list;
 
 TMGUIEdge::TMGUIEdge(TMGUIState *from, TMGUIState *to) :
     from(from),to(to)
 {
-    list.push_back(this);
+    edge_list.push_back(this);
     setFlag(ItemIsMovable);
     setFlag(ItemSendsGeometryChanges);
     setCacheMode(DeviceCoordinateCache);

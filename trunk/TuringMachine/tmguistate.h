@@ -6,7 +6,7 @@
 
 class TMGUIState : public QGraphicsItem
 {
-//    Q_OBJECT
+    //    Q_OBJECT
 public:
     explicit TMGUIState(int x, int y,TMGUI *tmgui = 0);
 
@@ -14,11 +14,12 @@ public:
     QPainterPath shape() const;
     void paint(QPainter *painter, const QStyleOptionGraphicsItem *option, QWidget *widget);
     QVariant itemChange(GraphicsItemChange change, const QVariant &value);
-//private:
+    //private:
     TMGUI *tmgui;
 
-//    void mousePressEvent(QGraphicsSceneMouseEvent *e);
-//    void mouseReleaseEvent(QGraphicsSceneMouseEvent *e);
+    static QList<TMGUIState*> state_list;
+    //    void mousePressEvent(QGraphicsSceneMouseEvent *e);
+    //    void mouseReleaseEvent(QGraphicsSceneMouseEvent *e);
 signals:
 
 public slots:

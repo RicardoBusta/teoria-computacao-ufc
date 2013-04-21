@@ -4,6 +4,8 @@
 
 #include "tmguiedge.h"
 
+QList<TMGUIState*> TMGUIState::state_list;
+
 TMGUIState::TMGUIState(int x, int y, TMGUI *tmgui)
 {
     this->setPos(x,y);
@@ -16,22 +18,31 @@ TMGUIState::TMGUIState(int x, int y, TMGUI *tmgui)
 
 void TMGUIState::paint(QPainter *painter, const QStyleOptionGraphicsItem *option, QWidget *widget)
 {
-    QBrush brush(QColor(0xff,0xff,0x00));
+    QBrush brush(QColor(0xff,0xff,0xff));
     QPen pen(QColor(0x00,0x00,0x00));
 
-    painter->setPen(pen);
-    painter->setBrush(brush);
-    painter->drawEllipse(-50,-50,100,100);
-    painter->drawText(0,0,"q0");
+    QRadialGradient gradient(0, 0, 100);
+    gradient.setCenter(0, 0);
+    gradient.setFocalPoint(0, 0);
 
-    painter->end();
+    gradient.setColorAt(0, Qt::yellow);
+    gradient.setColorAt(1, Qt::darkYellow);
+
+    painter->setBrush(gradient);
+    painter->setPen(pen);
+    //painter->setBrush(brush);
+    painter->drawEllipse(-50,-50,100,100);
+
+    painter->setBrush(brush);
+    painter->drawEllipse(-40,-40,80,80);
+    painter->drawText(0,0,"q0");
 }
 
 QVariant TMGUIState::itemChange(QGraphicsItem::GraphicsItemChange change, const QVariant &value)
 {
     switch (change) {
     case ItemPositionHasChanged:
-        foreach (TMGUIEdge *edge, TMGUIEdge::list){
+        foreach (TMGUIEdge *edge, TMGUIEdge::edge_list){
             edge->adjust();
         }
         break;
