@@ -14,7 +14,7 @@ public:
     QRectF boundingRect() const;
     void paint(QPainter *painter, const QStyleOptionGraphicsItem *option, QWidget *widget);
 
-    static QList<TMGUIEdge*> list;
+    static QList<TMGUIEdge*> edge_list;
 
     void adjust();
 private:
