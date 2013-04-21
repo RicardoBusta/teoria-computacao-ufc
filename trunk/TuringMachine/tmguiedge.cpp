@@ -30,5 +30,7 @@ void TMGUIEdge::paint(QPainter *painter, const QStyleOptionGraphicsItem *option,
 
 void TMGUIEdge::adjust()
 {
+    if (!from || !to)
+        return;
     update();
 }
