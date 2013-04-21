@@ -14,7 +14,8 @@ MainWindow::MainWindow(QWidget *parent) :
 {
   ui->setupUi(this);
 
-  ui->verticalWidget->hide();
+  //ui->verticalWidget->hide();
+  ui->widget->hide();
 
   this->setWindowTitle("Simulador de Maquina de Turing - by Ricardo Bustamante");
 
