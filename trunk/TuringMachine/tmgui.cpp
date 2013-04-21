@@ -3,6 +3,7 @@
 #include <QMouseEvent>
 
 #include "tmguistate.h"
+#include "tmguiedge.h"
 
 TMGUI::TMGUI(QWidget *parent) :
     QGraphicsView(parent)
@@ -16,13 +17,13 @@ TMGUI::TMGUI(QWidget *parent) :
     setRenderHint(QPainter::Antialiasing);
     setTransformationAnchor(AnchorUnderMouse);
     setMinimumSize(400, 400);
+
+    TMGUIState *from,*to;
+    scene->addItem(from = new TMGUIState(0,0,this));
+    scene->addItem(to = new TMGUIState(100,100,this));
+    scene->addItem(new TMGUIEdge(from,to));
 }
 
 TMGUI::~TMGUI()
 {
-}
-
-void TMGUI::mousePressEvent(QMouseEvent *event)
-{
-    this->scene()->addEllipse(QRectF(event->globalPos(),QSizeF(50,50)));
 }

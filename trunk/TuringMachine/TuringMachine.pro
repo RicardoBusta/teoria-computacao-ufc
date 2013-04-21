@@ -19,7 +19,8 @@ SOURCES += main.cpp\
     turingmachine.cpp \
     tmhistory.cpp \
     tmgui.cpp \
-    tmguistate.cpp
+    tmguistate.cpp \
+    tmguiedge.cpp
 
 HEADERS  += mainwindow.h \
     tmsyntax.h \
@@ -28,6 +29,7 @@ HEADERS  += mainwindow.h \
     turingmachine.h \
     tmhistory.h \
     tmgui.h \
-    tmguistate.h
+    tmguistate.h \
+    tmguiedge.h
 
 FORMS    += mainwindow.ui
