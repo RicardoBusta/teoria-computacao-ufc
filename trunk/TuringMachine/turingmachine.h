@@ -11,11 +11,12 @@ class TuringMachine : public QObject
 {
     Q_OBJECT
 public:
-    explicit TuringMachine(QObject *parent = 0);
+    explicit TuringMachine(QString name, QString default_tape, QString program, QObject *parent = 0);
 
     QString name;
 
-    QString tape;
+    QString program;
+    QString default_tape;
     int header_index;
     int step_count;
     int max_step_number;
@@ -40,6 +41,8 @@ public:
 
     static QMap<QString,TuringMachine*> machine_map;
     static QString machine_current;
+    static QString tape;
+    static TuringMachine* get();
 
     void clear();
 

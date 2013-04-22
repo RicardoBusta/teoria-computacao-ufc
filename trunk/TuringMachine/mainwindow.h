@@ -25,9 +25,12 @@ public slots:
   void process_text();
   void start_machine();
   void step_machine();
+  void back_step_machine();
   void show_log();
 
   void about_clicked();
+
+  void set_current_machine(QString name);
 };
 
 #endif // MAINWINDOW_H
