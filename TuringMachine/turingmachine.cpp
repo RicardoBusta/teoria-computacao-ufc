@@ -4,12 +4,26 @@
 
 QMap<QString,TuringMachine*> TuringMachine::machine_map;
 QString TuringMachine::machine_current;
+QString TuringMachine::tape = "";
 
-TuringMachine::TuringMachine(QObject *parent) :
+TuringMachine::TuringMachine(QString name, QString default_tape, QString program, QObject *parent) :
     QObject(parent)
 {
-    max_step_number = 1000;
+    this->name = name;
+    this->program = program;
+    this->default_tape = default_tape;
+    if(machine_map.contains(name)){
+        int count=0;
+        while(machine_map.contains(QString("%1_%2").arg(name).arg(count))){
+            count++;
+        }
+        name = QString("%1_%2").arg(name).arg(count);
+    }
+    qDebug() << "adding" << name;
+    process(program);
     begin("");
+    max_step_number = 1000;
+    machine_map.insert(name,this);
 }
 
 //State
@@ -92,6 +106,11 @@ void TuringMachine::character_add(const QString name)
     if(!character_list.contains(name)){
         character_list.push_back(name);
     }
+}
+
+TuringMachine *TuringMachine::get()
+{
+    return machine_map[machine_current];
 }
 
 void TuringMachine::begin(const QString tape)
