@@ -42,6 +42,7 @@ const static QRegExp token = QRegExp("(\\S+)");
 const static QRegExp name_option = QRegExp("(#(n|N)(a|A)(m|M)(e|E))");
 const static QRegExp init_option = QRegExp("(#(i|I)(n|N)(i|I)(t|T))");
 const static QRegExp halt_option = QRegExp("(#(h|H)(a|A)(l|L)(t|T))");
+const static QRegExp tape_option = QRegExp("(#(t|T)(a|A)(p|P)(e|E))");
 const static QRegExp machine_spec = QRegExp("("+halt_machine+")");
 const static QRegExp machine = QRegExp("[A-Z]([a-zA-Z0-9_]*)");
 const static QRegExp state_spec = QRegExp("("+halt_state+")");

@@ -11,16 +11,13 @@ class TuringMachine : public QObject
 {
     Q_OBJECT
 public:
-    explicit TuringMachine(QString name, QString default_tape, QString program, QObject *parent = 0);
+    explicit TuringMachine(QString program, QObject *parent = 0);
 
     QString name;
-
     QString program;
     QString default_tape;
-    int header_index;
-    int step_count;
-    int max_step_number;
-    QString state;
+
+
 
     QString state_first;
     QList<QString> state_list;
@@ -39,9 +36,15 @@ public:
 
     QList<TMHistory> history;
 
+    //Machine Execution
     static QMap<QString,TuringMachine*> machine_map;
-    static QString machine_current;
-    static QString tape;
+    static QString machine_current_machine;
+    static QString machine_current_state;
+    static QString machine_tape;
+    static int machine_head;
+    static int machine_step_count;
+    static int machine_step_max;
+
     static TuringMachine* get();
 
     void clear();
@@ -52,10 +55,14 @@ signals:
     void current_step(QString);
 
     void current_description(QString);
+
+    void debug_message(QString);
+
+    void rename_event();
 public slots:
     void process(const QString input);
 
-    void begin(const QString tape);
+    void begin(const QString machine_tape);
     bool step();
     void back_step();
 };

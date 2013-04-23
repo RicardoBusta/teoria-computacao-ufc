@@ -22,15 +22,19 @@ public:
 private:
   Ui::MainWindow *ui;
 public slots:
-  void process_text();
-  void start_machine();
-  void step_machine();
-  void back_step_machine();
-  void show_log();
+  void process_text() const;
+  void start_machine() const;
+  void step_machine() const;
+  void back_step_machine() const;
+  void show_log() const;
+  void create_machine(const QString program);
+  void set_current_machine(const QString name) const;
 
   void about_clicked();
 
-  void set_current_machine(QString name);
+  void debug_message(const QString s) const;
+
+  void machine_rename_handler();
 };
 
 #endif // MAINWINDOW_H
