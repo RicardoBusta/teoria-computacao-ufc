@@ -3,15 +3,19 @@
 #include <QDebug>
 
 QMap<QString,TuringMachine*> TuringMachine::machine_map;
-QString TuringMachine::machine_current;
-QString TuringMachine::tape = "";
+QString TuringMachine::machine_current_machine;
+QString TuringMachine::machine_current_state;
+QString TuringMachine::machine_tape;
+int TuringMachine::machine_head;
+int TuringMachine::machine_step_count;
+int TuringMachine::machine_step_max;
 
-TuringMachine::TuringMachine(QString name, QString default_tape, QString program, QObject *parent) :
+TuringMachine::TuringMachine(QString program, QObject *parent) :
     QObject(parent)
 {
-    this->name = name;
+    this->name = "New";
     this->program = program;
-    this->default_tape = default_tape;
+    this->default_tape = "";
     if(machine_map.contains(name)){
         int count=0;
         while(machine_map.contains(QString("%1_%2").arg(name).arg(count))){
@@ -19,10 +23,10 @@ TuringMachine::TuringMachine(QString name, QString default_tape, QString program
         }
         name = QString("%1_%2").arg(name).arg(count);
     }
-    qDebug() << "adding" << name;
+    emit debug_message( "adding " + name);
     process(program);
-    begin("");
-    max_step_number = 1000;
+    begin(default_tape);
+    machine_step_max = 1000;
     machine_map.insert(name,this);
 }
 
@@ -110,89 +114,97 @@ void TuringMachine::character_add(const QString name)
 
 TuringMachine *TuringMachine::get()
 {
-    return machine_map[machine_current];
+    return machine_map[machine_current_machine];
 }
 
 void TuringMachine::begin(const QString tape)
 {
     history.clear();
-    step_count=0;
-    this->tape = io_ex::begin_character+tape;
-    header_index = 1;
-    state = state_first;
-    qDebug() << "machine built.\n execute for: "+io_ex::begin_character+tape;
-    emit current_tape(QString(this->tape).insert(header_index+1,"</b></font>").insert(header_index,"<font color='#f00'><b>"));
-    emit current_state(state);
-    emit current_step(QString::number(step_count));
+    machine_step_count=0;
+    if(tape!=""){
+        this->machine_tape = io_ex::begin_character+tape;
+    }else{
+        this->machine_tape = io_ex::begin_character+"#";
+    }
+    machine_head = 1;
+    machine_current_state = state_first;
+
+    emit debug_message( "machine built.\n execute for: "+io_ex::begin_character+tape );
+
+    emit current_tape(QString(this->machine_tape).insert(machine_head+1,"</b></font>").insert(machine_head,"<font color='#f00'><b>"));
+    emit current_state(machine_current_state);
+    emit current_step(QString::number(machine_step_count));
 
 }
 
 bool TuringMachine::step()
 {
-    history.push_back(TMHistory(state,header_index,tape));
 
-    TMCommand current_command = command_map[state][QString(tape[header_index])];
+    TMCommand current_command = command_map[machine_current_state][QString(machine_tape[machine_head])];
 
-    if(step_count>=max_step_number){
-        qDebug() << "ERROR: max number of steps reached";
+    if(machine_step_count>=machine_step_max){
+        emit debug_message( "ERROR: max number of steps reached" );
         return false;
     }
-    step_count++;
-    if(state==io_ex::error_state){
-        qDebug() << "ERROR: machine stopped";
+
+    history.push_back(TMHistory(machine_current_state,machine_head,machine_tape));
+
+    machine_step_count++;
+    if(machine_current_state==io_ex::error_state){
+        emit debug_message( "ERROR: machine stopped" );
         return false;
     }
-    if(state==io_ex::halt_state){
-        qDebug() << "HALT:" << QString(tape).insert(header_index,'_');
+    if(machine_current_state==io_ex::halt_state){
+        emit debug_message( "HALT: " + QString(machine_tape).insert(machine_head,'_') );
         return false;
     }
 
     //CURRENT STATE IS NOT HALTING, SO GO TO NEXT
-    state = current_command.goto_state;
+    machine_current_state = current_command.goto_state;
 
     //AND EXECUTE COMMAND (left, right, write or error(go to error state))
     switch(current_command.type){
     case TMCOM_LEFT:
-        if(header_index>0){
-            header_index--;
+        if(machine_head>0){
+            machine_head--;
         }else{
-            qDebug() << "ERROR: accessing data out of tape. aborting.";
-            state = io_ex::error_state;
+            emit debug_message( "ERROR: accessing data out of tape. aborting." );
+            machine_current_state = io_ex::error_state;
         }
         break;
     case TMCOM_RIGHT:
-        if(header_index==tape.size()-1){
-            tape.append(io_ex::blank_character);
+        if(machine_head==machine_tape.size()-1){
+            machine_tape.append(io_ex::blank_character);
         }
-        header_index++;
+        machine_head++;
         break;
     case TMCOM_WRITE:
-        tape[header_index] = current_command.write_char[0];
+        machine_tape[machine_head] = current_command.write_char[0];
         break;
     case TMCOM_ERROR:
-        qDebug() << "ERROR: no operation defined for this command. aborting.";
-        state = io_ex::error_state;
+        emit debug_message( "ERROR: no operation defined for this command. aborting." );
+        machine_current_state = io_ex::error_state;
         break;
     }
 
-    emit current_tape(QString(this->tape).insert(header_index+1,"</b></font>").insert(header_index,"<font color='#f00'><b>"));
-    emit current_state(state);
-    emit current_step(QString::number(step_count));
+    emit current_tape(QString(this->machine_tape).insert(machine_head+1,"</b></font>").insert(machine_head,"<font color='#f00'><b>"));
+    emit current_state(machine_current_state);
+    emit current_step(QString::number(machine_step_count));
 
     return true;
 }
 
 void TuringMachine::back_step()
 {
-    if(!history.empty() && step_count>0){
-        state = history.last().state;
-        tape = history.last().tape;
-        header_index = history.last().head;
-        step_count--;
+    if(!history.empty() && machine_step_count>0){
+        machine_current_state = history.last().state;
+        machine_tape = history.last().tape;
+        machine_head = history.last().head;
+        machine_step_count--;
 
-        emit current_tape(QString(this->tape).insert(header_index+1,"</b></font>").insert(header_index,"<font color='#f00'><b>"));
-        emit current_state(state);
-        emit current_step(QString::number(step_count));
+        emit current_tape(QString(this->machine_tape).insert(machine_head+1,"</b></font>").insert(machine_head,"<font color='#f00'><b>"));
+        emit current_state(machine_current_state);
+        emit current_step(QString::number(machine_step_count));
 
         history.pop_back();
     }
@@ -202,6 +214,7 @@ void TuringMachine::back_step()
 
 void TuringMachine::process(const QString input)
 {
+    this->program = input;
     clear();
     bool valid = true;
     bool first_defined = false;
@@ -218,15 +231,17 @@ void TuringMachine::process(const QString input)
         case io_ex::LINE_OPTION:
             arg = line.split(QRegExp("(\\s+)"));
             if(io_ex::name_option.exactMatch(arg[0])){
-                qDebug() << "name";
-                if(TuringMachine::machine_map.contains(arg[1])){
+                if(TuringMachine::machine_map.contains(arg[1]) && TuringMachine::machine_map[arg[1]]!=this){
                     launch_error(i,"this machine already exists");
                     break;
                 }
-                machine_map.remove(this->name);
-                this->name = arg[1];
-                machine_map.insert(this->name,this);
-                machine_current = this->name;
+                if(arg[1]!=name){
+                    machine_map.remove(this->name);
+                    this->name = arg[1];
+                    machine_map.insert(this->name,this);
+                    machine_current_machine = this->name;
+                    emit rename_event();
+                }
             }else if(io_ex::init_option.exactMatch(arg[0])){
                 if(first_defined){
                     launch_error(i,"the first state was already defined");
@@ -234,7 +249,7 @@ void TuringMachine::process(const QString input)
                 first_defined=true;
                 state_first = arg[1];
             }else if(io_ex::halt_option.exactMatch(arg[0])){
-                qDebug() << "halt";
+
             }else{
                 launch_error(i,"unexistent option");
             }
@@ -289,10 +304,10 @@ void TuringMachine::process(const QString input)
     if (valid) {
         outstr += "<font color='#0a0'><b>[valid]</b></font><br>";
     }else{
-        outstr += QString("<font color='#a00'><b>[invalid:line %1] %2</b></font>").arg(errorline).arg(errorstring);
+        outstr += QString("<font color='#a00'><b>[invalid:line %1] %2</b></font><br>").arg(errorline).arg(errorstring);
     }
 
-    /*
+
     outstr += "<br>M(Machine) = { Q, &Gamma;, b, &Sigma;, &delta;, s, F }<br>";
 
     outstr += "Q(Machine States) = { ";
@@ -321,8 +336,17 @@ void TuringMachine::process(const QString input)
 
     outstr += QString("s(Initial State) = { %1, }<br>").arg(state_first);
 
-    outstr += QString("F(Final States) = { "+io_ex::halt_state+", }");
-*/
+    outstr += QString("F(Final States) = { "+io_ex::halt_state+", }<br>");
+
+    outstr += "Available Machines = { ";
+    foreach(TuringMachine *m, machine_map){
+        if(m!=NULL){
+            outstr += m->name+", ";
+        }
+    }
+    outstr +="}";
+
+
     emit current_description(outstr);
 }
 

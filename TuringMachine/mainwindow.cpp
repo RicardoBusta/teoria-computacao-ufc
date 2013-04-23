@@ -14,32 +14,29 @@ MainWindow::MainWindow(QWidget *parent) :
 {
     ui->setupUi(this);
 
-    //ui->verticalWidget->hide();
-    ui->widget->hide();
-
     this->setWindowTitle("Simulador de Maquina de Turing - by Ricardo Bustamante");
-
+    this->resize(800,600);
     ui->machine_input->clear();
 
     ui->machine_tape->setFont(io_font::input);
     ui->machine_input->setFont(io_font::input);
     ui->machine_debug->setFont(io_font::input);
-    ui->machine_debug->setStyleSheet("background-color:#fff;");
 
-    ui->label_current_state->setStyleSheet("background-color:#fff;");
-    ui->label_current_step->setStyleSheet("background-color:#fff;");
-    ui->label_current_tape->setStyleSheet("background-color:#fff;");
     ui->label_current_state->setFont(io_font::input);
     ui->label_current_step->setFont(io_font::input);
     ui->label_current_tape->setFont(io_font::input);
 
-    new TuringMachine("L","","//L Machine\nq0 a halt <\nq0 b halt <\nq0 # halt <",this);
+    create_machine("//Empty Machine");
+    create_machine("//Empty Machine");
+    create_machine("//Empty Machine");
 
-    new TuringMachine("R","","//R machine\nq0 a halt >\nq0 b halt >\nq0 # halt >",this);
+    create_machine("#name L\n//L Machine\nq0 a halt <\nq0 b halt <\nq0 # halt <");
 
-    new TuringMachine("Rblank","#aabbab","//Rblank machine\nq0 # q1 >\nq1 a q1 >\nq1 b q1 >\nq1 # halt #",this);
+    create_machine("#name R\n//R machine\nq0 a halt >\nq0 b halt >\nq0 # halt >");
 
-    TuringMachine::machine_current = "R";
+    create_machine("#name RBlank\n//RBlank machine\n//Rblank machine\nq0 # q1 >\nq1 a q1 >\nq1 b q1 >\nq1 # halt #");
+
+    set_current_machine(ui->comboBox->currentText());
 
 
     new TMSyntax(ui->machine_input);
@@ -50,6 +47,8 @@ MainWindow::MainWindow(QWidget *parent) :
     connect(ui->actionAbout,SIGNAL(triggered()),this,SLOT(about_clicked()));
     connect(ui->machine_log,SIGNAL(clicked()),this,SLOT(show_log()));
     connect(ui->machine_step_back,SIGNAL(clicked()),this, SLOT(back_step_machine()));
+
+    connect(ui->comboBox,SIGNAL(currentIndexChanged(QString)),this,SLOT(set_current_machine(QString)));
 }
 
 MainWindow::~MainWindow()
@@ -57,7 +56,7 @@ MainWindow::~MainWindow()
     delete ui;
 }
 
-void MainWindow::process_text()
+void MainWindow::process_text() const
 {
     TuringMachine *m = TuringMachine::get();
     if(m){
@@ -65,7 +64,7 @@ void MainWindow::process_text()
     }
 }
 
-void MainWindow::start_machine()
+void MainWindow::start_machine() const
 {
     TuringMachine *m = TuringMachine::get();
     if(m){
@@ -73,16 +72,15 @@ void MainWindow::start_machine()
     }
 }
 
-void MainWindow::step_machine()
+void MainWindow::step_machine() const
 {
     TuringMachine *m = TuringMachine::get();
     if(m){
         m->step();
     }
-    qDebug() << TuringMachine::machine_current;
 }
 
-void MainWindow::show_log()
+void MainWindow::show_log() const
 {
     QString out;
     foreach(TMHistory h,TuringMachine::get()->history){
@@ -98,25 +96,46 @@ void MainWindow::about_clicked()
     about->exec();
 }
 
-void MainWindow::set_current_machine(QString name)
+void MainWindow::create_machine(const QString program)
 {
-    if(TuringMachine::machine_map.contains(name)){
+    TuringMachine *m = new TuringMachine(program,this);
+    ui->comboBox->addItem(m->name);
+}
+
+void MainWindow::set_current_machine(const QString name) const
+{
+    if(TuringMachine::machine_map.contains(name) && name!=TuringMachine::get()->name){
         if(TuringMachine::get()){
             disconnect(TuringMachine::get(),0,0,0);
         }
-        TuringMachine::machine_current = name;
+        TuringMachine::machine_current_machine = name;
         connect(TuringMachine::get(),SIGNAL(current_state(QString)),ui->label_current_state,SLOT(setText(QString)));
         connect(TuringMachine::get(),SIGNAL(current_tape(QString)),ui->label_current_tape,SLOT(setText(QString)));
         connect(TuringMachine::get(),SIGNAL(current_step(QString)),ui->label_current_step,SLOT(setText(QString)));
         connect(TuringMachine::get(),SIGNAL(current_description(QString)),ui->machine_debug,SLOT(setText(QString)));
+        connect(TuringMachine::get(),SIGNAL(debug_message(QString)),this,SLOT(debug_message(QString)));
+        connect(TuringMachine::get(),SIGNAL(rename_event()),this,SLOT(machine_rename_handler()));
 
         ui->machine_input->setText(TuringMachine::get()->program);
-        ui->machine_tape->setText(TuringMachine::get()->default_tape);
+
+        if(TuringMachine::get()->default_tape!=""){
+            ui->machine_tape->setText(TuringMachine::get()->default_tape);
+        }
     }
 }
 
+void MainWindow::debug_message(const QString s) const
+{
+    ui->debug_text->append( s );
+}
 
-void MainWindow::back_step_machine()
+void MainWindow::machine_rename_handler()
+{   
+    ui->comboBox->setItemText(ui->comboBox->currentIndex(), TuringMachine::machine_current_machine);
+}
+
+
+void MainWindow::back_step_machine() const
 {
     TuringMachine *m = TuringMachine::get();
     if(m){
