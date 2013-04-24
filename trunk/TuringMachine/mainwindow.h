@@ -17,8 +17,6 @@ public:
   explicit MainWindow(QWidget *parent = 0);
   ~MainWindow();
 
-  //TMExecution tmexec;
-
 private:
   Ui::MainWindow *ui;
 public slots:

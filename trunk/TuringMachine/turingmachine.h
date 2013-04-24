@@ -17,8 +17,6 @@ public:
     QString program;
     QString default_tape;
 
-
-
     QString state_first;
     QList<QString> state_list;
 
@@ -60,9 +58,10 @@ signals:
 
     void rename_event();
 public slots:
-    void process(const QString input);
+    void process(const QString text);
+    void process(const QTextDocument *document);
 
-    void begin(const QString machine_tape);
+    void begin();
     bool step();
     void back_step();
 };
