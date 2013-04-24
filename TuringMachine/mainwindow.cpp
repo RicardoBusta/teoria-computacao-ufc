@@ -8,6 +8,8 @@
 
 #include "tmguistate.h"
 
+#include <QScrollBar>
+
 MainWindow::MainWindow(QWidget *parent) :
     QMainWindow(parent),
     ui(new Ui::MainWindow)
@@ -18,29 +20,34 @@ MainWindow::MainWindow(QWidget *parent) :
     this->resize(800,600);
     ui->machine_input->clear();
 
-    ui->machine_tape->setFont(io_font::input);
+    io_font::input.setFamily("Courier");
+    io_font::input.setStyleHint(QFont::Monospace);
+    io_font::input.setFixedPitch(true);
+    io_font::input.setPointSize(12);
+
     ui->machine_input->setFont(io_font::input);
     ui->machine_debug->setFont(io_font::input);
 
     ui->label_current_state->setFont(io_font::input);
     ui->label_current_step->setFont(io_font::input);
     ui->label_current_tape->setFont(io_font::input);
+    ui->line_number->setFont(io_font::input);
 
     create_machine("//Empty Machine");
     create_machine("//Empty Machine");
     create_machine("//Empty Machine");
 
-    create_machine("#name L\n//L Machine\nq0 a halt <\nq0 b halt <\nq0 # halt <");
+    create_machine("#name L\n#tape #\n//L Machine\nq0 a halt <\nq0 b halt <\nq0 # halt <");
 
-    create_machine("#name R\n//R machine\nq0 a halt >\nq0 b halt >\nq0 # halt >");
+    create_machine("#name R\n#tape #\n//R machine\nq0 a halt >\nq0 b halt >\nq0 # halt >");
 
-    create_machine("#name RBlank\n//RBlank machine\n//Rblank machine\nq0 # q1 >\nq1 a q1 >\nq1 b q1 >\nq1 # halt #");
+    create_machine("#name RBlank\n#tape #aabbba\n//RBlank machine\nq0 # q1 >\nq1 a q1 >\nq1 b q1 >\nq1 # halt #");
 
     set_current_machine(ui->comboBox->currentText());
 
 
     new TMSyntax(ui->machine_input);
-    connect(ui->machine_input, SIGNAL(textChanged()), this, SLOT(process_text()));
+    connect(ui->machine_input->document(), SIGNAL(contentsChanged()), this, SLOT(process_text()));
     connect(ui->machine_start,SIGNAL(clicked()),this,SLOT(start_machine()));
     connect(ui->machine_step,SIGNAL(clicked()),this,SLOT(step_machine()));
 
@@ -49,6 +56,10 @@ MainWindow::MainWindow(QWidget *parent) :
     connect(ui->machine_step_back,SIGNAL(clicked()),this, SLOT(back_step_machine()));
 
     connect(ui->comboBox,SIGNAL(currentIndexChanged(QString)),this,SLOT(set_current_machine(QString)));
+
+    connect(ui->machine_input->verticalScrollBar(),SIGNAL(valueChanged(int)),ui->line_number->verticalScrollBar(),SLOT(setValue(int)));
+    connect(ui->line_number->verticalScrollBar(),SIGNAL(valueChanged(int)),ui->machine_input->verticalScrollBar(),SLOT(setValue(int)));
+
 }
 
 MainWindow::~MainWindow()
@@ -58,9 +69,17 @@ MainWindow::~MainWindow()
 
 void MainWindow::process_text() const
 {
+    int c = ui->machine_input->document()->lineCount();
+    ui->line_number->clear();
+    for(int i=0;i<c;i++){
+        ui->line_number->append(QString("%1.").arg(i));
+    }
+    int l;
+    ui->line_number->setFixedWidth(QFontMetrics(io_font::input).width(QString("%1..").arg(c-1)));
+
     TuringMachine *m = TuringMachine::get();
     if(m){
-        m->process(ui->machine_input->toPlainText());
+        m->process(ui->machine_input->document());
     }
 }
 
@@ -68,7 +87,7 @@ void MainWindow::start_machine() const
 {
     TuringMachine *m = TuringMachine::get();
     if(m){
-        m->begin(ui->machine_tape->text());
+        m->begin();
     }
 }
 
@@ -117,10 +136,6 @@ void MainWindow::set_current_machine(const QString name) const
         connect(TuringMachine::get(),SIGNAL(rename_event()),this,SLOT(machine_rename_handler()));
 
         ui->machine_input->setText(TuringMachine::get()->program);
-
-        if(TuringMachine::get()->default_tape!=""){
-            ui->machine_tape->setText(TuringMachine::get()->default_tape);
-        }
     }
 }
 

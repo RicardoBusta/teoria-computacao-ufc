@@ -42,6 +42,8 @@ private:
             pos = pos+io_ex::token.matchedLength();
         }
     }
+
+//    void set_format()
 };
 
 #endif // TMSYNTAX_H

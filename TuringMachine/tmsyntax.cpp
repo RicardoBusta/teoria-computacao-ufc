@@ -5,12 +5,15 @@
 
 #include "exnamespace.h"
 
+enum SYN_STATE{SYN_ERROR,SYN_SEM_ERROR};
+
 TMSyntax::TMSyntax(QTextEdit *parent) :
     QSyntaxHighlighter(parent)
 {
     QColor comment_color = QColor(0,150,0);
     QColor state_color = QColor(0,0,150);
-    QColor error_color = QColor(255,0,0);
+    QColor syntax_error_color = QColor(255,0,0);
+    QColor semantic_error_color = QColor(0,255,0);
     QColor character_color = QColor(0,150,150);
     QColor command_color = QColor(150,0,150);
     QColor option_color = QColor(250,0,150);
@@ -21,8 +24,11 @@ TMSyntax::TMSyntax(QTextEdit *parent) :
     io_format::comment.setForeground(QBrush(comment_color));
 
     // Error
-    io_format::error.setUnderlineColor(error_color);
-    io_format::error.setUnderlineStyle(QTextCharFormat::WaveUnderline);
+    io_format::syntax_error.setUnderlineColor(syntax_error_color);
+    io_format::syntax_error.setUnderlineStyle(QTextCharFormat::WaveUnderline);
+
+    io_format::semantic_error.setUnderlineColor(semantic_error_color);
+    io_format::semantic_error.setUnderlineStyle(QTextCharFormat::WaveUnderline);
 
     // State
     io_format::state.setForeground(QBrush(state_color));
@@ -52,20 +58,29 @@ TMSyntax::TMSyntax(QTextEdit *parent) :
 
 void TMSyntax::highlightBlock(const QString &text)
 {
-    if(previousBlockState()==1){
-        //setCurrentBlockState(1);
-        setFormat(0,text.size(),io_format::error);
+    qDebug() << currentBlock().text() << currentBlock().userState() << previousBlockState();
+
+    if(previousBlockState()==SYN_ERROR){
+        setCurrentBlockState(1);
+        setFormat(0,text.size(),io_format::syntax_error);
         return;
     }
 
-    //setCurrentBlockState(0);
+    if(currentBlockState()==2){
+        //setCurrentBlockState(1);
+        setFormat(0,text.size(),io_format::semantic_error);
+        return;
+    }
+
+    setCurrentBlockState(-1);
 
     switch(io_ex::line_type(text)){
     case io_ex::LINE_OPTION:
         setFormat(0,text.size(),io_format::option);
         break;
 
-    case io_ex::LINE_VALID:
+    case io_ex::LINE_VALID_MACHINE:
+    case io_ex::LINE_VALID_STATE:
         break_line_token(text);
 
         switch(token_list[0].type){
@@ -140,8 +155,8 @@ void TMSyntax::highlightBlock(const QString &text)
 
     case io_ex::LINE_ERROR:
     default:
-        setFormat(0,text.size(),io_format::error);
-        //setCurrentBlockState(1);
+        setFormat(0,text.size(),io_format::syntax_error);
+        setCurrentBlockState(1);
         break;
     }
 }
