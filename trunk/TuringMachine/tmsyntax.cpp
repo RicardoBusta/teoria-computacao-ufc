@@ -58,8 +58,6 @@ TMSyntax::TMSyntax(QTextEdit *parent) :
 
 void TMSyntax::highlightBlock(const QString &text)
 {
-    qDebug() << currentBlock().text() << currentBlock().userState() << previousBlockState();
-
     if(previousBlockState()==SYN_ERROR){
         setCurrentBlockState(1);
         setFormat(0,text.size(),io_format::syntax_error);

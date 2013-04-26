@@ -20,7 +20,8 @@ SOURCES += main.cpp\
     tmhistory.cpp \
     tmgui.cpp \
     tmguistate.cpp \
-    tmguiedge.cpp
+    tmguiedge.cpp \
+    tmtextedit.cpp
 
 HEADERS  += mainwindow.h \
     tmsyntax.h \
@@ -30,6 +31,7 @@ HEADERS  += mainwindow.h \
     tmhistory.h \
     tmgui.h \
     tmguistate.h \
-    tmguiedge.h
+    tmguiedge.h \
+    tmtextedit.h
 
 FORMS    += mainwindow.ui
