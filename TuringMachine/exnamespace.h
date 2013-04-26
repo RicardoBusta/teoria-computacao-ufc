@@ -1,3 +1,20 @@
+/**
+ *  Máquina de Turing - Ricardo Bustamante de Queiroz
+ *  Copyright (C) <year>  <name of author>
+ *  This program is free software: you can redistribute it and/or modify
+ *  it under the terms of the GNU General Public License as published by
+ *  the Free Software Foundation, either version 3 of the License, or
+ *  (at your option) any later version.
+ *
+ *  This program is distributed in the hope that it will be useful,
+ *  but WITHOUT ANY WARRANTY; without even the implied warranty of
+ *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ *  GNU General Public License for more details.
+ *
+ *  You should have received a copy of the GNU General Public License
+ *  along with this program.  If not, see http://www.gnu.org/licenses/.
+ */
+
 #ifndef EXNAMESPACE_H
 #define EXNAMESPACE_H
 
@@ -58,12 +75,13 @@ const static QRegExp option_line = QRegExp("^(\\s*)("+name_option.pattern()+"|"+
 const static QRegExp comment = QRegExp("^((//(.*))|(/\\*(.*)\\*/))$"/*|(#(.*))*/);
 const static QRegExp white_line = QRegExp("^(\\s*)$");
 const static QRegExp valid_line_state = QRegExp("^(\\s*)("+state.pattern()+"|"+machine.pattern()+")"
-                                          +"(\\s+)("+character.pattern()+"|"+character_spec.pattern()+")"
-                                          +"(\\s+)("+state.pattern()+"|"+state_spec.pattern()+")"
-                                          +"(\\s+)("+command.pattern()+"|"+character.pattern()+"|"+character_spec.pattern()+")(\\s*)$");
+                                                +"(\\s+)("+character.pattern()+"|"+character_spec.pattern()+")"
+                                                +"(\\s+)("+state.pattern()+"|"+state_spec.pattern()+")"
+                                                +"(\\s+)("+command.pattern()+"|"+character.pattern()+"|"+character_spec.pattern()+")(\\s*)$");
 const static QRegExp valid_line_machine = QRegExp("^(\\s*)("+state.pattern()+"|"+machine.pattern()+")"
-                                          +"(\\s+)("+character.pattern()+"|"+character_spec.pattern()+")"
-                                          +"(\\s+)("+machine.pattern()+"|"+machine_spec.pattern()+")(\\s*)$");
+                                                  +"(\\s+)("+character.pattern()+"|"+character_spec.pattern()+")"
+                                                  +"(\\s+)("+machine.pattern()+"|"+machine_spec.pattern()+")"
+                                                  +"(\\s+)("+character.pattern()+"|"+character_spec.pattern()+")(\\s*)$");
 
 
 static inline TOKEN token_type_s(const QString s){

@@ -9,6 +9,7 @@
 #include "tmguistate.h"
 
 #include <QScrollBar>
+#include <QFileDialog>
 
 MainWindow::MainWindow(QWidget *parent) :
     QMainWindow(parent),
@@ -27,30 +28,29 @@ MainWindow::MainWindow(QWidget *parent) :
 
     ui->machine_input->setFont(io_font::input);
     ui->machine_debug->setFont(io_font::input);
-
     ui->label_current_state->setFont(io_font::input);
     ui->label_current_step->setFont(io_font::input);
     ui->label_current_tape->setFont(io_font::input);
     ui->line_number->setFont(io_font::input);
 
-    create_machine("//Empty Machine");
-    create_machine("//Empty Machine");
-    create_machine("//Empty Machine");
+    ui->comboBox->addItem("--");
+
+    create_machine("#name HELP\n\n//HELP MACHINE");
 
     create_machine("#name L\n#tape #\n//L Machine\nq0 a halt <\nq0 b halt <\nq0 # halt <");
 
     create_machine("#name R\n#tape #\n//R machine\nq0 a halt >\nq0 b halt >\nq0 # halt >");
 
+    create_machine("#name C\n#tape #ab\n//Composite test machine\nq0 * q1 *\nq1 * R *\nR * L *\nL * halt *");
+
     create_machine("#name RBlank\n#tape #aabbba\n//RBlank machine\nq0 # q1 >\nq1 a q1 >\nq1 b q1 >\nq1 # halt #");
 
     set_current_machine(ui->comboBox->currentText());
 
-
     new TMSyntax(ui->machine_input);
-    connect(ui->machine_input->document(), SIGNAL(contentsChanged()), this, SLOT(process_text()));
-    connect(ui->machine_start,SIGNAL(clicked()),this,SLOT(start_machine()));
-    connect(ui->machine_step,SIGNAL(clicked()),this,SLOT(step_machine()));
 
+    connect(ui->machine_step,SIGNAL(clicked()),this,SLOT(step_machine()));
+    connect(ui->machine_input->document(), SIGNAL(contentsChanged()), this, SLOT(process_text()));
     connect(ui->actionAbout,SIGNAL(triggered()),this,SLOT(about_clicked()));
     connect(ui->machine_log,SIGNAL(clicked()),this,SLOT(show_log()));
     connect(ui->machine_step_back,SIGNAL(clicked()),this, SLOT(back_step_machine()));
@@ -60,6 +60,11 @@ MainWindow::MainWindow(QWidget *parent) :
     connect(ui->machine_input->verticalScrollBar(),SIGNAL(valueChanged(int)),ui->line_number->verticalScrollBar(),SLOT(setValue(int)));
     connect(ui->line_number->verticalScrollBar(),SIGNAL(valueChanged(int)),ui->machine_input->verticalScrollBar(),SLOT(setValue(int)));
 
+    connect(ui->push_save,SIGNAL(clicked()),this,SLOT(save_machine()));
+    connect(ui->push_load,SIGNAL(clicked()),this,SLOT(load_machine()));
+
+    connect(ui->push_add,SIGNAL(clicked()),this,SLOT(add_machine()));
+    connect(ui->push_remove,SIGNAL(clicked()),this,SLOT(remove_machine()));
 }
 
 MainWindow::~MainWindow()
@@ -74,20 +79,13 @@ void MainWindow::process_text() const
     for(int i=0;i<c;i++){
         ui->line_number->append(QString("%1.").arg(i));
     }
-    int l;
     ui->line_number->setFixedWidth(QFontMetrics(io_font::input).width(QString("%1..").arg(c-1)));
 
-    TuringMachine *m = TuringMachine::get();
-    if(m){
-        m->process(ui->machine_input->document());
-    }
-}
-
-void MainWindow::start_machine() const
-{
-    TuringMachine *m = TuringMachine::get();
-    if(m){
-        m->begin();
+    if(TuringMachine::get()){
+        TuringMachine *m = TuringMachine::get();
+        if(m){
+            m->process(ui->machine_input->document());
+        }
     }
 }
 
@@ -115,27 +113,61 @@ void MainWindow::about_clicked()
     about->exec();
 }
 
-void MainWindow::create_machine(const QString program)
+QString MainWindow::create_machine(const QString program)
 {
     TuringMachine *m = new TuringMachine(program,this);
     ui->comboBox->addItem(m->name);
+    return m->name;
 }
 
-void MainWindow::set_current_machine(const QString name) const
+void MainWindow::set_current_machine(const QString name)
 {
-    if(TuringMachine::machine_map.contains(name) && name!=TuringMachine::get()->name){
+    qDebug() << name;
+    if(TuringMachine::machine_map.contains(name)){
+        qDebug() << "ok!";
         if(TuringMachine::get()){
             disconnect(TuringMachine::get(),0,0,0);
         }
+
         TuringMachine::machine_current_machine = name;
-        connect(TuringMachine::get(),SIGNAL(current_state(QString)),ui->label_current_state,SLOT(setText(QString)));
-        connect(TuringMachine::get(),SIGNAL(current_tape(QString)),ui->label_current_tape,SLOT(setText(QString)));
-        connect(TuringMachine::get(),SIGNAL(current_step(QString)),ui->label_current_step,SLOT(setText(QString)));
-        connect(TuringMachine::get(),SIGNAL(current_description(QString)),ui->machine_debug,SLOT(setText(QString)));
+        connect(TuringMachine::get(),SIGNAL(current_state_signal(QString)),ui->label_current_state,SLOT(setText(QString)));
+        connect(TuringMachine::get(),SIGNAL(current_tape_signal(QString)),ui->label_current_tape,SLOT(setText(QString)));
+        connect(TuringMachine::get(),SIGNAL(current_step_signal(QString)),ui->label_current_step,SLOT(setText(QString)));
+        connect(TuringMachine::get(),SIGNAL(current_description_signal(QString)),ui->machine_debug,SLOT(setText(QString)));
         connect(TuringMachine::get(),SIGNAL(debug_message(QString)),this,SLOT(debug_message(QString)));
         connect(TuringMachine::get(),SIGNAL(rename_event()),this,SLOT(machine_rename_handler()));
 
+        ui->label_current_state->setEnabled(true);
+        ui->label_current_tape->setEnabled(true);
+        ui->label_current_step->setEnabled(true);
+        ui->machine_debug->setEnabled(true);
+        ui->machine_input->setEnabled(true);
+        qDebug() << TuringMachine::get()->program;
         ui->machine_input->setText(TuringMachine::get()->program);
+    }else{
+        qDebug() << "nop!";
+
+        if(TuringMachine::get()){
+            disconnect(TuringMachine::get(),0,0,0);
+        }
+
+        TuringMachine::machine_current_machine = "";
+
+        ui->label_current_state->clear();
+        ui->label_current_state->setEnabled(false);
+        ui->label_current_tape->clear();
+        ui->label_current_tape->setEnabled(false);
+        ui->label_current_step->clear();
+        ui->label_current_step->setEnabled(false);
+        ui->machine_debug->clear();
+        ui->machine_debug->setEnabled(false);
+        ui->machine_input->clear();
+        ui->machine_input->setEnabled(false);
+    }
+    if(TuringMachine::get() && TuringMachine::get()->current_state_is_machine){
+        qDebug() << "first state is machine";
+    }else{
+        qDebug() << "first state is state";
     }
 }
 
@@ -149,6 +181,43 @@ void MainWindow::machine_rename_handler()
     ui->comboBox->setItemText(ui->comboBox->currentIndex(), TuringMachine::machine_current_machine);
 }
 
+void MainWindow::save_machine()
+{
+    QString filename;
+    filename = QFileDialog::getSaveFileName(this,"Save File","","Text File (*.txt);;Turing Machine (*.mt)");
+    if( filename=="" ) return;
+    QFile outfile(filename);
+    if( !outfile.open( QIODevice::Append | QIODevice::Text ) ) return;
+    QTextStream out(&outfile);
+    out << ui->machine_input->toPlainText() << endl;
+}
+
+void MainWindow::load_machine()
+{
+    QString filename;
+    filename = QFileDialog::getOpenFileName(this,"Open File","","Text File (*.txt);;Turing Machine (*.mt)");
+    if( filename == "" ) return;
+    QFile infile(filename);
+    if( !infile.open( QIODevice::ReadOnly | QIODevice::Text )) return;
+    QTextStream in(&infile);
+    ui->machine_input->setText( in.readAll() );
+}
+
+void MainWindow::add_machine()
+{
+    QString m = create_machine("");
+    ui->comboBox->setCurrentIndex(ui->comboBox->findText(m));
+    set_current_machine(m);
+
+}
+
+void MainWindow::remove_machine()
+{
+    if(ui->comboBox->currentIndex()!=0){
+        ui->comboBox->removeItem(ui->comboBox->currentIndex());
+        set_current_machine(ui->comboBox->currentText());
+    }
+}
 
 void MainWindow::back_step_machine() const
 {

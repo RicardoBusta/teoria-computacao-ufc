@@ -17,6 +17,10 @@ public:
     QString program;
     QString default_tape;
 
+    bool halted;
+    bool current_state_is_machine;
+    QString current_state;
+
     QString state_first;
     QList<QString> state_list;
 
@@ -48,11 +52,11 @@ public:
     void clear();
 
 signals:
-    void current_state(QString);
-    void current_tape(QString);
-    void current_step(QString);
+    void current_state_signal(QString);
+    void current_tape_signal(QString);
+    void current_step_signal(QString);
 
-    void current_description(QString);
+    void current_description_signal(QString);
 
     void debug_message(QString);
 
@@ -61,7 +65,6 @@ public slots:
     void process(const QString text);
     void process(const QTextDocument *document);
 
-    void begin();
     bool step();
     void back_step();
 };

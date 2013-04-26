@@ -4,7 +4,13 @@
 #include <QString>
 #include <QMap>
 
-enum TMCOM_TYPE{TMCOM_LEFT,TMCOM_RIGHT,TMCOM_WRITE,TMCOM_ERROR};
+enum TMCOM_TYPE{
+    TMCOM_LEFT,
+    TMCOM_RIGHT,
+    TMCOM_WRITE,
+    TMCOM_EXEC,
+    TMCOM_ERROR
+};
 
 class TMCommand
 {
