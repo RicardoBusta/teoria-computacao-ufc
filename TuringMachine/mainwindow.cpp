@@ -122,9 +122,7 @@ QString MainWindow::create_machine(const QString program)
 
 void MainWindow::set_current_machine(const QString name)
 {
-    qDebug() << name;
     if(TuringMachine::machine_map.contains(name)){
-        qDebug() << "ok!";
         if(TuringMachine::get()){
             disconnect(TuringMachine::get(),0,0,0);
         }
@@ -142,11 +140,8 @@ void MainWindow::set_current_machine(const QString name)
         ui->label_current_step->setEnabled(true);
         ui->machine_debug->setEnabled(true);
         ui->machine_input->setEnabled(true);
-        qDebug() << TuringMachine::get()->program;
         ui->machine_input->setText(TuringMachine::get()->program);
     }else{
-        qDebug() << "nop!";
-
         if(TuringMachine::get()){
             disconnect(TuringMachine::get(),0,0,0);
         }
@@ -163,11 +158,6 @@ void MainWindow::set_current_machine(const QString name)
         ui->machine_debug->setEnabled(false);
         ui->machine_input->clear();
         ui->machine_input->setEnabled(false);
-    }
-    if(TuringMachine::get() && TuringMachine::get()->current_state_is_machine){
-        qDebug() << "first state is machine";
-    }else{
-        qDebug() << "first state is state";
     }
 }
 
