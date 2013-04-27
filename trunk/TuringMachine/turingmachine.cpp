@@ -78,6 +78,7 @@ void TuringMachine::state_add(const QString name)
 //Command
 void TuringMachine::command_queue_add(const QStringList s_list, const int line_defined)
 {
+    qDebug() << "add command:" << s_list[0] << s_list[1] << s_list[2] << s_list[3];
     command_queue_list.push_back(s_list);
     command_queue_line.push_back(line_defined);
 }
@@ -85,49 +86,52 @@ void TuringMachine::command_queue_add(const QStringList s_list, const int line_d
 int TuringMachine::command_add()
 {
     while(command_queue_list.size()>0){
+        QStringList command = command_queue_list.takeFirst();
+
+        qDebug() << "command add: " << command;
+
+        int line = command_queue_line.takeFirst();
         TMCOM_TYPE t;
-        if(io_ex::machine.exactMatch(command_queue_list.first()[2]) || io_ex::machine_spec.exactMatch(command_queue_list.first()[2])){
+        if(io_ex::machine.exactMatch(command[2]) || io_ex::machine_spec.exactMatch(command[2])){
             t = TMCOM_EXEC;
-        }else if(command_queue_list.first()[3]==io_ex::right_command){
+        }else if(command[3]==io_ex::right_command){
             t = TMCOM_RIGHT;
-        }else if(command_queue_list.first()[3]==io_ex::left_command){
+        }else if(command[3]==io_ex::left_command){
             t = TMCOM_LEFT;
         }else{
             t = TMCOM_WRITE;
         }
 
         //State to command
-        if(command_queue_list.first()[1]==io_ex::all_character){
+        if(command[1]==io_ex::all_character){
             foreach(QString c,character_list){
-                if(command_map[command_queue_list.first()[0]][c].line_defined==-1){
-                    if(command_queue_list.first()[3]!=io_ex::all_character){
-                        command_map[command_queue_list.first()[0]][c].set(t,command_queue_list.first()[3],command_queue_list.first()[2],-1);
+                if(command_map[command[0]][c].line_defined==-1){
+                    if(command[3]!=io_ex::all_character){
+                        command_map[command[0]][c].set(t,command[3],command[2],-1);
                     }else{
-                        command_map[command_queue_list.first()[0]][c].set(t,c,command_queue_list.first()[2],-1);
+                        command_map[command[0]][c].set(t,c,command[2],-1);
                     }
                 }else{
                     //Leave as it is
                 }
             }
         }else{
-            if(command_map[command_queue_list.first()[0]][command_queue_list.first()[1]].line_defined==-1){
-                if(command_queue_list.first()[3]!=io_ex::all_character){
-                    command_map[command_queue_list.first()[0]][command_queue_list.first()[1]].set(t,command_queue_list.first()[3],command_queue_list.first()[2],command_queue_line.first());
+            if(command_map[command[0]][command[1]].line_defined==-1){
+                if(command[3]!=io_ex::all_character){
+                    command_map[command[0]][command[1]].set(t,command[3],command[2],line);
                 }else{
-                    command_map[command_queue_list.first()[0]][command_queue_list.first()[1]].set(t,command_queue_list.first()[1],command_queue_list.first()[2],command_queue_line.first());
+                    command_map[command[0]][command[1]].set(t,command[1],command[2],line);
                 }
+                qDebug() << command_map[command[0]][command[1]].goto_state << command_map[command[0]][command[1]].write_char;
             }else{
-                int res = command_map[command_queue_list.first()[0]][command_queue_list.first()[1]].line_defined;
-                command_line_redefined = command_queue_line.first();
+                int res = command_map[command[0]][command[1]].line_defined;
+                command_line_redefined = line;
                 command_queue_list.clear();
                 command_queue_line.clear();
                 return res;
             }
 
         }
-
-        command_queue_list.pop_front();
-        command_queue_line.pop_front();
     }
     return -1;
 }
@@ -165,6 +169,8 @@ bool TuringMachine::step()
         return false;
     }
 
+    qDebug() << "executing: " << current_command.goto_state << current_command.write_char;
+
     //Current command is a running machine
     if( current_state_is_machine ){
         if( TuringMachine::machine_map[current_state] && !TuringMachine::machine_map[current_state]->halted ){
@@ -179,9 +185,9 @@ bool TuringMachine::step()
     //CURRENT STATE IS NOT HALTING, SO GO TO NEXT
     history.push_back(TMHistory(current_state,machine_head,machine_tape));
 
-    machine_current_state = current_command.goto_state;
+    current_state = current_command.goto_state;
 
-    if( machine_current_state == io_ex::halt_state ){
+    if( current_state == io_ex::halt_state ){
         halted = true;
     }
 
@@ -216,7 +222,7 @@ bool TuringMachine::step()
     }
 
     emit current_tape_signal(QString(this->machine_tape).insert(machine_head+1,"</b></font>").insert(machine_head,"<font color='#f00'><b>"));
-    emit current_state_signal(machine_current_state);
+    emit current_state_signal(current_state);
     emit current_step_signal(QString::number(machine_step_count));
 
     return true;
