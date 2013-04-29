@@ -41,7 +41,6 @@ public:
     //Machine Execution
     static QMap<QString,TuringMachine*> machine_map;
     static QString machine_current_machine;
-    static QString machine_current_state;
     static QString machine_tape;
     static int machine_head;
     static int machine_step_count;
