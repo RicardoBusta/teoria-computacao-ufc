@@ -6,7 +6,6 @@
 
 QMap<QString,TuringMachine*> TuringMachine::machine_map;
 QString TuringMachine::machine_current_machine;
-QString TuringMachine::machine_current_state;
 QString TuringMachine::machine_tape;
 int TuringMachine::machine_head;
 int TuringMachine::machine_step_count;
@@ -88,8 +87,6 @@ int TuringMachine::command_add()
     while(command_queue_list.size()>0){
         QStringList command = command_queue_list.takeFirst();
 
-        qDebug() << "command add: " << command;
-
         int line = command_queue_line.takeFirst();
         TMCOM_TYPE t;
         if(io_ex::machine.exactMatch(command[2]) || io_ex::machine_spec.exactMatch(command[2])){
@@ -169,18 +166,19 @@ bool TuringMachine::step()
         return false;
     }
 
-    qDebug() << "executing: " << current_command.goto_state << current_command.write_char;
-
     //Current command is a running machine
     if( current_state_is_machine ){
+        qDebug() << "current machine is machine" << current_state;
         if( TuringMachine::machine_map[current_state] && !TuringMachine::machine_map[current_state]->halted ){
             TuringMachine::machine_map[current_state]->step();
-            emit current_state_signal(current_state+": "+TuringMachine::machine_map[machine_current_state]->current_state);
-            //emit current_tape_signal(QString(this->machine_tape).insert(machine_head+1,"</b></font>").insert(machine_head,"<font color='#f00'><b>"));
+            emit current_state_signal(current_state+": "+TuringMachine::machine_map[current_state]->current_state);
+            emit current_tape_signal(QString(this->machine_tape).insert(machine_head+1,"</b></font>").insert(machine_head,"<font color='#f00'><b>"));
             emit current_step_signal(QString::number(machine_step_count));
             return true;
         }
     }
+
+    qDebug() << "executing: " << current_command.goto_state << current_command.write_char << current_state_is_machine;
 
     //CURRENT STATE IS NOT HALTING, SO GO TO NEXT
     history.push_back(TMHistory(current_state,machine_head,machine_tape));
@@ -192,9 +190,9 @@ bool TuringMachine::step()
     }
 
     //AND EXECUTE COMMAND (left, right, write or error(go to error state))
-    current_state_is_machine = false;
     switch(current_command.type){
     case TMCOM_EXEC:
+        qDebug() << "transforming into machine execution";
         current_state_is_machine = true;
         return step();
     case TMCOM_LEFT:
@@ -231,13 +229,13 @@ bool TuringMachine::step()
 void TuringMachine::back_step()
 {
     if(!history.empty() && machine_step_count>0){
-        machine_current_state = history.last().state;
+        current_state = history.last().state;
         machine_tape = history.last().tape;
         machine_head = history.last().head;
         machine_step_count--;
 
         emit current_tape_signal(QString(this->machine_tape).insert(machine_head+1,"</b></font>").insert(machine_head,"<font color='#f00'><b>"));
-        emit current_state_signal(machine_current_state);
+        emit current_state_signal(current_state);
         emit current_step_signal(QString::number(machine_step_count));
 
         history.pop_back();
@@ -466,10 +464,10 @@ void TuringMachine::process(const QTextDocument *document)
         this->machine_tape = io_ex::begin_character+"#";
     }
     machine_head = 1;
-    machine_current_state = state_first;
+    current_state = state_first;
 
     emit current_tape_signal(QString(this->machine_tape).insert(machine_head+1,"</b></font>").insert(machine_head,"<font color='#f00'><b>"));
-    emit current_state_signal(machine_current_state);
+    emit current_state_signal(current_state);
     emit current_step_signal(QString::number(machine_step_count));
     emit current_description_signal(outstr);
 }
