@@ -52,13 +52,7 @@ MainWindow::MainWindow(QWidget *parent) :
 
     create_machine("#name RBlank\n#tape #aabbba\n//RBlank machine\nq0 # q1 >\nq1 a q1 >\nq1 b q1 >\nq1 # halt #");
 
-<<<<<<< .mine    create_machine("#name ER\n#tape #aaaabbb\n\nq0 a q1 >\nq0 b q1 >\nq0 # q1 >\nq1 a q1 >\nq1 b q1 >\nq1 # q2 <\nq2 a q3 #\nq3 a q2 <\nq2 b q3 #\nq3 b q2 <\nq2 # halt *\nq3 # q2 <");
-
-
-=======    create_machine("#name ER\n#tape #aaaabbb\n\nq0 a q1 >\nq0 b q1 >\nq0 # q1 >\nq1 a q1 >\nq1 b q1 >\nq1 # q2 <\nq2 a q3 #\nq3 a q2 <\nq2 b q3 #\nq3 b q2 <\nq2 # halt *\nq3 # q2 <\n");
-
-
->>>>>>> .theirs    set_current_machine(ui->comboBox->currentText());
+    create_machine("#name ER\n#tape #aaaabbb\n\nq0 a q1 >\nq0 b q1 >\nq0 # q1 >\nq1 a q1 >\nq1 b q1 >\nq1 # q2 <\nq2 a q3 #\nq3 a q2 <\nq2 b q3 #\nq3 b q2 <\nq2 # halt *\nq3 # q2 <");
 
     new TMSyntax(ui->machine_input);
 

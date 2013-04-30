@@ -21,7 +21,8 @@ SOURCES += main.cpp\
     tmgui.cpp \
     tmguistate.cpp \
     tmguiedge.cpp \
-    tmtextedit.cpp
+    tmtextedit.cpp \
+    tminstance.cpp
 
 HEADERS  += mainwindow.h \
     tmsyntax.h \
@@ -32,6 +33,7 @@ HEADERS  += mainwindow.h \
     tmgui.h \
     tmguistate.h \
     tmguiedge.h \
-    tmtextedit.h
+    tmtextedit.h \
+    tminstance.h
 
 FORMS    += mainwindow.ui
