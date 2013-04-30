@@ -62,6 +62,8 @@ void TuringMachine::clear()
         }
     }
 
+    related_machines.clear();
+
     //History
     history.clear();
 }
@@ -72,6 +74,13 @@ void TuringMachine::state_add(const QString name)
         state_list.push_back(name);
     }
 
+}
+
+void TuringMachine::machine_add(const QString name)
+{
+    if(!related_machines.contains(name)){
+        related_machines.push_back(name);
+    }
 }
 
 //Command
@@ -89,7 +98,7 @@ int TuringMachine::command_add()
 
         int line = command_queue_line.takeFirst();
         TMCOM_TYPE t;
-        if(io_ex::machine.exactMatch(command[2]) || io_ex::machine_spec.exactMatch(command[2])){
+        if(io_ex::machine_instance.exactMatch(command[2])){
             t = TMCOM_EXEC;
         }else if(command[3]==io_ex::right_command){
             t = TMCOM_RIGHT;
@@ -300,7 +309,6 @@ void TuringMachine::process(const QTextDocument *document)
                 current_state = arg[1];
                 switch(io_ex::token_type_s(current_state)){
                 case io_ex::TOKEN_MACHINE:
-                case io_ex::TOKEN_MACHINE_SPEC:
                     current_state_is_machine = true;
                     break;
                 case io_ex::TOKEN_STATE:
@@ -342,7 +350,6 @@ void TuringMachine::process(const QTextDocument *document)
                 current_state = arg[0];
                 switch(io_ex::token_type_s(current_state)){
                 case io_ex::TOKEN_MACHINE:
-                case io_ex::TOKEN_MACHINE_SPEC:
                     current_state_is_machine = true;
                     break;
                 case io_ex::TOKEN_STATE:
@@ -361,14 +368,19 @@ void TuringMachine::process(const QTextDocument *document)
                     launch_error(block.blockNumber(),"unexistent machine (first argument)");
                     break;
                 }
+                machine_add(arg[0]);
             }
+
             character_add(arg[1]);
+
             if(io_ex::state.exactMatch(arg[2]) || io_ex::state_spec.exactMatch(arg[2])){
                 state_add(arg[2]);
             }else{
                 if(!machine_map.contains(arg[2])){
                     launch_error(block.blockNumber(),"unexistent machine (second argument)");
+                    break;
                 }
+                machine_add(arg[2]);
             }
             if(arg.size()>3){
                 if(arg[3]!=io_ex::left_command && arg[3]!=io_ex::right_command){
@@ -453,6 +465,12 @@ void TuringMachine::process(const QTextDocument *document)
         if(m!=NULL){
             outstr += m->name+", ";
         }
+    }
+    outstr +="}<br>";
+
+    outstr += "Related Machines = {";
+    foreach(QString s, related_machines){
+        outstr += s+", ";
     }
     outstr +="}";
 

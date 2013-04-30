@@ -19,19 +19,26 @@ MainWindow::MainWindow(QWidget *parent) :
 
     this->setWindowTitle("Simulador de Maquina de Turing - by Ricardo Bustamante");
     this->resize(800,600);
-    ui->machine_input->clear();
 
+    io_font::input = QFont("consolas",12);
     io_font::input.setFamily("Courier");
     io_font::input.setStyleHint(QFont::Monospace);
     io_font::input.setFixedPitch(true);
     io_font::input.setPointSize(12);
 
+    ui->machine_input->clear();
+    ui->line_number->clear();
+
+    ui->machine_input->document()->setDefaultFont(io_font::input);
+    ui->line_number->document()->setDefaultFont(io_font::input);
+
     ui->machine_input->setFont(io_font::input);
     ui->machine_debug->setFont(io_font::input);
+    ui->line_number->setFont(io_font::input);
     ui->label_current_state->setFont(io_font::input);
     ui->label_current_step->setFont(io_font::input);
     ui->label_current_tape->setFont(io_font::input);
-    ui->line_number->setFont(io_font::input);
+
 
     ui->comboBox->addItem("--");
 
@@ -45,10 +52,13 @@ MainWindow::MainWindow(QWidget *parent) :
 
     create_machine("#name RBlank\n#tape #aabbba\n//RBlank machine\nq0 # q1 >\nq1 a q1 >\nq1 b q1 >\nq1 # halt #");
 
-    create_machine("#name ER\n#tape #aaaabbb\n\nq0 a q1 >\nq0 b q1 >\nq0 # q1 >\nq1 a q1 >\nq1 b q1 >\nq1 # q2 <\nq2 a q3 #\nq3 a q2 <\nq2 b q3 #\nq3 b q2 <\nq2 # halt *\nq3 # q2 <\n");
+<<<<<<< .mine    create_machine("#name ER\n#tape #aaaabbb\n\nq0 a q1 >\nq0 b q1 >\nq0 # q1 >\nq1 a q1 >\nq1 b q1 >\nq1 # q2 <\nq2 a q3 #\nq3 a q2 <\nq2 b q3 #\nq3 b q2 <\nq2 # halt *\nq3 # q2 <");
 
 
-    set_current_machine(ui->comboBox->currentText());
+=======    create_machine("#name ER\n#tape #aaaabbb\n\nq0 a q1 >\nq0 b q1 >\nq0 # q1 >\nq1 a q1 >\nq1 b q1 >\nq1 # q2 <\nq2 a q3 #\nq3 a q2 <\nq2 b q3 #\nq3 b q2 <\nq2 # halt *\nq3 # q2 <\n");
+
+
+>>>>>>> .theirs    set_current_machine(ui->comboBox->currentText());
 
     new TMSyntax(ui->machine_input);
 
@@ -82,7 +92,7 @@ void MainWindow::process_text() const
     for(int i=0;i<c;i++){
         ui->line_number->append(QString("%1.").arg(i));
     }
-    ui->line_number->setFixedWidth(QFontMetrics(io_font::input).width(QString("%1..").arg(c-1)));
+    ui->line_number->setFixedWidth(QFontMetrics(io_font::input).width(QString("%1AB").arg(c-1)));
 
     if(TuringMachine::get()){
         TuringMachine *m = TuringMachine::get();
