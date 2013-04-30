@@ -32,8 +32,7 @@ enum TOKEN{
     TOKEN_CHARACTER,
     TOKEN_CHARACTER_SPEC,
     TOKEN_COMMAND,
-    TOKEN_MACHINE,
-    TOKEN_MACHINE_SPEC
+    TOKEN_MACHINE
 };
 
 enum LINE{
@@ -53,7 +52,6 @@ const static QString blank_character = QString("#");
 const static QString begin_character = QString("@");
 const static QString left_command = QString("<");
 const static QString right_command = QString(">");
-const static QString halt_machine = QString("HALT");
 
 //Tokens
 const static QRegExp token = QRegExp("(\\S+)");
@@ -62,8 +60,8 @@ const static QRegExp init_option = QRegExp("(#(i|I)(n|N)(i|I)(t|T))");
 const static QRegExp halt_option = QRegExp("(#(h|H)(a|A)(l|L)(t|T))");
 const static QRegExp step_option = QRegExp("(#(s|S)(t|T)(e|E)(p|P))");
 const static QRegExp tape_option = QRegExp("(#(t|T)(a|A)(p|P)(e|E))");
-const static QRegExp machine_spec = QRegExp("("+halt_machine+")");
 const static QRegExp machine = QRegExp("[A-Z]([a-zA-Z0-9_]*)");
+const static QRegExp machine_instance = QRegExp("("+machine.pattern()+")\\(([0-9]+)\\)");
 const static QRegExp state_spec = QRegExp("("+halt_state+")");
 const static QRegExp state = QRegExp("[a-z]([a-zA-Z0-9_]*)");
 const static QRegExp character_spec = QRegExp("["+blank_character+begin_character+all_character+"]");
@@ -74,13 +72,13 @@ const static QRegExp option_line = QRegExp("^(\\s*)("+name_option.pattern()+"|"+
 //Lines
 const static QRegExp comment = QRegExp("^((//(.*))|(/\\*(.*)\\*/))$"/*|(#(.*))*/);
 const static QRegExp white_line = QRegExp("^(\\s*)$");
-const static QRegExp valid_line_state = QRegExp("^(\\s*)("+state.pattern()+"|"+machine.pattern()+")"
+const static QRegExp valid_line_state = QRegExp("^(\\s*)("+state.pattern()+"|"+machine_instance.pattern()+")"
                                                 +"(\\s+)("+character.pattern()+"|"+character_spec.pattern()+")"
                                                 +"(\\s+)("+state.pattern()+"|"+state_spec.pattern()+")"
                                                 +"(\\s+)("+command.pattern()+"|"+character.pattern()+"|"+character_spec.pattern()+")(\\s*)$");
-const static QRegExp valid_line_machine = QRegExp("^(\\s*)("+state.pattern()+"|"+machine.pattern()+")"
+const static QRegExp valid_line_machine = QRegExp("^(\\s*)("+state.pattern()+"|"+machine_instance.pattern()+")"
                                                   +"(\\s+)("+character.pattern()+"|"+character_spec.pattern()+")"
-                                                  +"(\\s+)("+machine.pattern()+"|"+machine_spec.pattern()+")"
+                                                  +"(\\s+)("+machine_instance.pattern()+")"
                                                   +"(\\s+)("+character.pattern()+"|"+character_spec.pattern()+")(\\s*)$");
 
 
@@ -89,9 +87,7 @@ static inline TOKEN token_type_s(const QString s){
         return TOKEN_STATE_SPEC;
     }else if(state.exactMatch(s)){
         return TOKEN_STATE;
-    }else if(machine_spec.exactMatch(s)){
-        return TOKEN_MACHINE_SPEC;
-    }else if(machine.exactMatch(s)){
+    }else if(machine_instance.exactMatch(s)){
         return TOKEN_MACHINE;
     }else if(character_spec.exactMatch(s)){
         return TOKEN_CHARACTER_SPEC;
@@ -111,8 +107,6 @@ static inline TOKEN token_type_c(const QString s){
         return TOKEN_STATE_SPEC;
     }else if(state.exactMatch(s)){
         return TOKEN_STATE;
-    }else if(machine_spec.exactMatch(s)){
-        return TOKEN_MACHINE_SPEC;
     }else if(machine.exactMatch(s)){
         return TOKEN_MACHINE;
     }else if(command.exactMatch(s)){
@@ -153,7 +147,7 @@ static QTextCharFormat machine_spec;
 }
 
 namespace io_font{
-static QFont input = QFont("consolas",12);
+static QFont input;// = QFont("consolas",12);
 }
 
 #endif // EXNAMESPACE_H

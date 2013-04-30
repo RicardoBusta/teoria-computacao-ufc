@@ -26,9 +26,13 @@ public:
 
     void state_add(const QString name);
 
+    QList<QString> related_machines;
+    void machine_add(const QString name);
+
     QMap< QString,QMap<QString,TMCommand> > command_map;
     QList<QStringList> command_queue_list;
     QList<int> command_queue_line;
+
     void command_queue_add(const QStringList s_list, const int line_defined);
     int command_add();
     int command_line_redefined;

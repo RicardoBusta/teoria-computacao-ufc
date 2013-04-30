@@ -22,38 +22,49 @@ TMSyntax::TMSyntax(QTextEdit *parent) :
     // White
     // Comment
     io_format::comment.setForeground(QBrush(comment_color));
+    //io_format::comment.setFont(io_font::input);
 
     // Error
     io_format::syntax_error.setUnderlineColor(syntax_error_color);
     io_format::syntax_error.setUnderlineStyle(QTextCharFormat::WaveUnderline);
+    //io_format::syntax_error.setFont(io_font::input);
 
     io_format::semantic_error.setUnderlineColor(semantic_error_color);
     io_format::semantic_error.setUnderlineStyle(QTextCharFormat::WaveUnderline);
+    //io_format::semantic_error.setFont(io_font::input);
 
     // State
     io_format::state.setForeground(QBrush(state_color));
     io_format::state.setFontItalic(true);
+    //io_format::state.setFont(io_font::input);
     // spec
     io_format::state_spec.setForeground(QBrush(state_color));
     io_format::state_spec.setFontWeight(99);
+    //io_format::state_spec.setFont(io_font::input);
 
     // Character
     io_format::character.setForeground(QBrush(character_color));
+    //io_format::character.setFont(io_font::input);
     // spec
     io_format::character_spec.setForeground(QBrush(character_color));
+    //io_format::character_spec.setFont(io_font::input);
 
     // Command
     io_format::command.setForeground(QBrush(command_color));
+    //io_format::command.setFont(io_font::input);
 
     // Option
     io_format::option.setForeground(QBrush(option_color));
+    //io_format::option.setFont(io_font::input);
 
     // Machine
     io_format::machine.setForeground(QBrush(machine_color));
     io_format::machine.setFontItalic(true);
+    //io_format::machine.setFont(io_font::input);
     // spec
     io_format::machine_spec.setForeground(QBrush(machine_color));
     io_format::machine_spec.setFontWeight(99);
+    //io_format::machine_spec.setFont(io_font::input);
 }
 
 void TMSyntax::highlightBlock(const QString &text)
@@ -83,13 +94,10 @@ void TMSyntax::highlightBlock(const QString &text)
 
         switch(token_list[0].type){
         case io_ex::TOKEN_STATE_SPEC:
-             setFormat(token_list[0].start, token_list[0].count, io_format::state_spec);
+            setFormat(token_list[0].start, token_list[0].count, io_format::state_spec);
             break;
         case io_ex::TOKEN_STATE:
             setFormat(token_list[0].start,token_list[0].count,io_format::state);
-            break;
-        case io_ex::TOKEN_MACHINE_SPEC:
-            setFormat(token_list[0].start,token_list[0].count,io_format::machine_spec);
             break;
         case io_ex::TOKEN_MACHINE:
             setFormat(token_list[0].start,token_list[0].count,io_format::machine);
@@ -116,9 +124,6 @@ void TMSyntax::highlightBlock(const QString &text)
             break;
         case io_ex::TOKEN_STATE:
             setFormat(token_list[2].start,token_list[2].count,io_format::state);
-            break;
-        case io_ex::TOKEN_MACHINE_SPEC:
-            setFormat(token_list[2].start,token_list[2].count,io_format::machine_spec);
             break;
         case io_ex::TOKEN_MACHINE:
             setFormat(token_list[2].start,token_list[2].count,io_format::machine);

@@ -2,10 +2,16 @@
 #include <QApplication>
 
 int main(int argc, char *argv[])
-{
-  QApplication a(argc, argv);
-  MainWindow w;
-  w.show();
+{    
+    //io_font::input = QFont("consolas",12);
+    io_font::input.setFamily("Courier");
+    io_font::input.setStyleHint(QFont::Monospace);
+    io_font::input.setFixedPitch(true);
+    io_font::input.setPointSize(12);
 
-  return a.exec();
+    QApplication a(argc, argv);
+    MainWindow w;
+    w.show();
+
+    return a.exec();
 }
