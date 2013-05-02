@@ -24,7 +24,7 @@ TuringMachine::TuringMachine(QString program, QObject *parent) :
         }
         name = QString("%1_%2").arg(name).arg(count);
     }
-    //emit debug_message( "adding " + name);
+    emit debug_message( "adding " + name);
     process(program);
     machine_step_max = 1000;
     machine_map.insert(name,this);
@@ -68,13 +68,6 @@ void TuringMachine::clear()
     history.clear();
 }
 
-TuringMachine TuringMachine::operator =(TuringMachine tm)
-{
-    this->name = tm.name;
-    this->program = tm.program;
-    this->process(this->program);
-}
-
 void TuringMachine::state_add(const QString name)
 {
     if(!state_list.contains(name)){
@@ -86,7 +79,7 @@ void TuringMachine::state_add(const QString name)
 void TuringMachine::machine_add(const QString name)
 {
     if(!related_machines.contains(name)){
-        related_machines.insert(name,TMInstance(name,machine_map[name]));
+        related_machines.push_back(name);
     }
 }
 
@@ -340,8 +333,6 @@ void TuringMachine::process(const QTextDocument *document)
                     launch_error(block.blockNumber(),"tape defined twice");
                 }
                 // invalid option.
-            }else if(io_ex::include_option.exactMatch(arg[0])){
-
             }else{
                 launch_error(block.blockNumber(),"unexistent option");
             }
@@ -478,8 +469,8 @@ void TuringMachine::process(const QTextDocument *document)
     outstr +="}<br>";
 
     outstr += "Related Machines = {";
-    foreach(TMInstance *m, related_machines){
-        outstr += m->name+", ";
+    foreach(QString s, related_machines){
+        outstr += s+", ";
     }
     outstr +="}";
 
