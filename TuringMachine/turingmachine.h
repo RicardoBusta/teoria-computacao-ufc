@@ -6,7 +6,6 @@
 #include "exnamespace.h"
 #include "tmcommand.h"
 #include "tmhistory.h"
-#include "tminstance.h"
 
 class TuringMachine : public QObject
 {
@@ -27,7 +26,7 @@ public:
 
     void state_add(const QString name);
 
-    QMap<QString,TMInstance> related_machines;
+    QList<QString> related_machines;
     void machine_add(const QString name);
 
     QMap< QString,QMap<QString,TMCommand> > command_map;
@@ -54,8 +53,6 @@ public:
     static TuringMachine* get();
 
     void clear();
-
-    TuringMachine operator=(TuringMachine tm);
 
 signals:
     void current_state_signal(QString);
