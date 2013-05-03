@@ -6,6 +6,7 @@
 #include "exnamespace.h"
 #include "tmcommand.h"
 #include "tmhistory.h"
+#include "tminstance.h"
 
 class TuringMachine : public QObject
 {
@@ -26,8 +27,8 @@ public:
 
     void state_add(const QString name);
 
-    QList<QString> related_machines;
-    void machine_add(const QString name);
+    QMap<QString,TMInstance*> related_machines;
+    void machine_add(const QString alias, const QString name);
 
     QMap< QString,QMap<QString,TMCommand> > command_map;
     QList<QStringList> command_queue_list;

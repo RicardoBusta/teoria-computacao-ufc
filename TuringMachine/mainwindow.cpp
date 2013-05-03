@@ -54,6 +54,8 @@ MainWindow::MainWindow(QWidget *parent) :
 
     create_machine("#name ER\n#tape #aaaabbb\n\nq0 a q1 >\nq0 b q1 >\nq0 # q1 >\nq1 a q1 >\nq1 b q1 >\nq1 # q2 <\nq2 a q3 #\nq3 a q2 <\nq2 b q3 #\nq3 b q2 <\nq2 # halt *\nq3 # q2 <");
 
+    set_current_machine("--");
+
     new TMSyntax(ui->machine_input);
 
     connect(ui->machine_step,SIGNAL(clicked()),this,SLOT(step_machine()));
