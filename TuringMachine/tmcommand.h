@@ -17,12 +17,15 @@ class TMCommand
 public:
   TMCommand();
 
+  QString state;
+  QString character;
+
   TMCOM_TYPE type;
   QString write_char;
   QString goto_state;
   int line_defined;
 
-  void set(const TMCOM_TYPE type, const QString write_char, const QString goto_state, const int line_defined);
+  void set(const QString state, const QString character, const TMCOM_TYPE type, const QString write_char, const QString goto_state, const int line_defined);
 
 
   TMCommand operator=(const TMCommand command);

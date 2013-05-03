@@ -13,8 +13,12 @@ class TuringMachine : public QObject
     Q_OBJECT
 public:
     explicit TuringMachine(QString program, QObject *parent = 0);
+    explicit TuringMachine(QString alias, TuringMachine *tm);
+
+    bool root_machine;
 
     QString name;
+    QString alias;
     QString program;
     QString default_tape;
 
@@ -27,7 +31,7 @@ public:
 
     void state_add(const QString name);
 
-    QMap<QString,TMInstance*> related_machines;
+    QMap<QString,TuringMachine*> related_machines;
     void machine_add(const QString alias, const QString name);
 
     QMap< QString,QMap<QString,TMCommand> > command_map;
@@ -48,12 +52,13 @@ public:
     static QString machine_current_machine;
     static QString machine_tape;
     static int machine_head;
-    static int machine_step_count;
+    int machine_step_count;
     static int machine_step_max;
 
     static TuringMachine* get();
 
     void clear();
+    void reset_execution();
 
 signals:
     void current_state_signal(QString);
@@ -68,6 +73,9 @@ signals:
 public slots:
     void process(const QString text);
     void process(const QTextDocument *document);
+
+    QString gen_machine_code();
+    QString gen_resulting_code();
 
     bool step();
     void back_step();

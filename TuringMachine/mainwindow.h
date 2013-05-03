@@ -39,6 +39,8 @@ public slots:
 
   void add_machine();
   void remove_machine();
+
+  void show_current_machine_code();
 };
 
 #endif // MAINWINDOW_H

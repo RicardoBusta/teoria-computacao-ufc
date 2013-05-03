@@ -35,7 +35,7 @@ TMSyntax::TMSyntax(QTextEdit *parent) :
 
     // State
     io_format::state.setForeground(QBrush(state_color));
-    io_format::state.setFontItalic(true);
+    //io_format::state.setFontItalic(true);
     //io_format::state.setFont(io_font::input);
     // spec
     io_format::state_spec.setForeground(QBrush(state_color));
@@ -59,7 +59,7 @@ TMSyntax::TMSyntax(QTextEdit *parent) :
 
     // Machine
     io_format::machine.setForeground(QBrush(machine_color));
-    io_format::machine.setFontItalic(true);
+    //io_format::machine.setFontItalic(true);
     //io_format::machine.setFont(io_font::input);
     // spec
     io_format::machine_spec.setForeground(QBrush(machine_color));
