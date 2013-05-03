@@ -52,6 +52,7 @@ const static QString blank_character = QString("#");
 const static QString begin_character = QString("@");
 const static QString left_command = QString("<");
 const static QString right_command = QString(">");
+const static QString tape_alphabet = QString("([a-zA-Z0-9"+blank_character+begin_character+"])");
 
 //Tokens
 const static QRegExp token = QRegExp("(\\S+)");
@@ -60,7 +61,7 @@ const static QRegExp init_option = QRegExp("(#(i|I)(n|N)(i|I)(t|T))");
 const static QRegExp halt_option = QRegExp("(#(h|H)(a|A)(l|L)(t|T))");
 const static QRegExp step_option = QRegExp("(#(s|S)(t|T)(e|E)(p|P))");
 const static QRegExp tape_option = QRegExp("(#(t|T)(a|A)(p|P)(e|E))");
-const static QRegExp include_option = QRegExp("(#(i|I)(n|N)(c|C)(l|L)(u|U)(d|D)(e|E))");
+const static QRegExp include_option = QRegExp("(#(h|H)(a|A)(v|V)(e|E))");
 const static QRegExp machine = QRegExp("[A-Z]([a-zA-Z0-9_]*)");
 const static QRegExp machine_instance = QRegExp("("+machine.pattern()+")");
 const static QRegExp state_spec = QRegExp("("+halt_state+")");
@@ -70,11 +71,11 @@ const static QRegExp character = QRegExp("[a-zA-Z0-9]");
 const static QRegExp command = QRegExp("["+left_command+right_command+"]");
 
 const static QRegExp option_line = QRegExp(QString("^(\\s*)(")
-                                           +"("+name_option.pattern()+")(\\s+)(\\S+)(\\s*)|"
-                                           +"("+init_option.pattern()+")(\\s+)(\\S+)(\\s*)|"
-                                           +"("+halt_option.pattern()+")(\\s+)(\\S+)(\\s*)|"
-                                           +"("+tape_option.pattern()+")(\\s+)(\\S+)(\\s*)|"
-                                           +"("+include_option.pattern()+")(\\s+)(\\S+)(\\s+)(\\S+)(\\s*)|"
+                                           +"("+name_option.pattern()+")(\\s+)("+machine.pattern()+")(\\s*)|"
+                                           +"("+init_option.pattern()+")(\\s+)("+state.pattern()+")(\\s*)|"
+                                           +"("+halt_option.pattern()+")(\\s+)("+state.pattern()+")(\\s*)|"
+                                           +"("+tape_option.pattern()+")(\\s+)("+tape_alphabet+"+)(\\s*)|"
+                                           +"("+include_option.pattern()+")(\\s+)("+machine.pattern()+")(\\s+)("+machine.pattern()+")(\\s*)|"
                                            +")$");
 //Lines
 const static QRegExp comment = QRegExp("^((//(.*))|(/\\*(.*)\\*/))$"/*|(#(.*))*/);

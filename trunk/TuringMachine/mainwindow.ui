@@ -307,7 +307,16 @@ p, li { white-space: pre-wrap; }
        <property name="spacing">
         <number>1</number>
        </property>
-       <property name="margin">
+       <property name="leftMargin">
+        <number>0</number>
+       </property>
+       <property name="topMargin">
+        <number>0</number>
+       </property>
+       <property name="rightMargin">
+        <number>0</number>
+       </property>
+       <property name="bottomMargin">
         <number>0</number>
        </property>
        <item>
@@ -330,6 +339,13 @@ p, li { white-space: pre-wrap; }
           <widget class="QPushButton" name="machine_log">
            <property name="text">
             <string>Show Log</string>
+           </property>
+          </widget>
+         </item>
+         <item>
+          <widget class="QPushButton" name="pushButton">
+           <property name="text">
+            <string>PushButton</string>
            </property>
           </widget>
          </item>

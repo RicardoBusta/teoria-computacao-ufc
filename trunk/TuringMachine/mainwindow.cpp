@@ -48,11 +48,19 @@ MainWindow::MainWindow(QWidget *parent) :
 
     create_machine("#name R\n#tape #\n//R machine\nq0 a halt >\nq0 b halt >\nq0 # halt >");
 
-    create_machine("#name C\n#tape #ab\n//Composite test machine\nq0 * q1 *\nq1 * R *\nR * L *\nL * halt *");
+    create_machine("#name C\n#tape #ab\n#have R1 R\n#have R2 R\n#have L L\n\n//Composite test machine\nq0 * q1 *\nq1 * R1 *\nR1 * R2 *\nR2 * L *\nL * halt *");
 
-    create_machine("#name RBlank\n#tape #aabbba\n//RBlank machine\nq0 # q1 >\nq1 a q1 >\nq1 b q1 >\nq1 # halt #");
+    create_machine("#name RBlank\n#tape #aabbba\n#have R R\n//RBlank machine\ns * R *\nR * R *\nR # halt *\n");
 
     create_machine("#name ER\n#tape #aaaabbb\n\nq0 a q1 >\nq0 b q1 >\nq0 # q1 >\nq1 a q1 >\nq1 b q1 >\nq1 # q2 <\nq2 a q3 #\nq3 a q2 <\nq2 b q3 #\nq3 b q2 <\nq2 # halt *\nq3 # q2 <");
+
+    create_machine("#name Ra\n#tape bbbbba\n#have R R\n//RBlank machine\ns * R *\nR * R *\nR a halt *\n");
+
+    create_machine("#name Sright\n\n#tape abb\n\n#have RB RBlank\n#have L1 L\n#have L0 L\n#have Ra R\n#have Rb R\n\ns * RB *\nRB * L0 *\nL0 # halt *\nL0 a ea #\nL0 b eb #\nea * Ra *\neb * RB *\nRa * wa a\nRb * wb b\nwa * L1 *\nwb * L1 *\nL1 * L0 *\n\n\n");
+
+    create_machine("");
+
+    create_machine("");
 
     set_current_machine("--");
 
@@ -74,6 +82,8 @@ MainWindow::MainWindow(QWidget *parent) :
 
     connect(ui->push_add,SIGNAL(clicked()),this,SLOT(add_machine()));
     connect(ui->push_remove,SIGNAL(clicked()),this,SLOT(remove_machine()));
+
+    connect(ui->pushButton,SIGNAL(clicked()),this,SLOT(show_current_machine_code()));
 }
 
 MainWindow::~MainWindow()
@@ -215,6 +225,19 @@ void MainWindow::remove_machine()
     if(ui->comboBox->currentIndex()!=0){
         ui->comboBox->removeItem(ui->comboBox->currentIndex());
         set_current_machine(ui->comboBox->currentText());
+    }
+}
+
+void MainWindow::show_current_machine_code()
+{
+    if(TuringMachine::get()){
+        QMainWindow *win = new QMainWindow();
+        //QLineEdit *box = new QLineEdit(TuringMachine::get()->gen_machine_code(),win);
+        QLabel *box = new QLabel(TuringMachine::get()->gen_resulting_code(),win);
+        box->setTextInteractionFlags(Qt::TextSelectableByKeyboard|Qt::TextSelectableByMouse);
+        box->setCursor(Qt::IBeamCursor);
+        win->setCentralWidget(box);
+        win->show();
     }
 }
 
