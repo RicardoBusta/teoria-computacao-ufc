@@ -60,15 +60,22 @@ const static QRegExp init_option = QRegExp("(#(i|I)(n|N)(i|I)(t|T))");
 const static QRegExp halt_option = QRegExp("(#(h|H)(a|A)(l|L)(t|T))");
 const static QRegExp step_option = QRegExp("(#(s|S)(t|T)(e|E)(p|P))");
 const static QRegExp tape_option = QRegExp("(#(t|T)(a|A)(p|P)(e|E))");
+const static QRegExp include_option = QRegExp("(#(i|I)(n|N)(c|C)(l|L)(u|U)(d|D)(e|E))");
 const static QRegExp machine = QRegExp("[A-Z]([a-zA-Z0-9_]*)");
-const static QRegExp machine_instance = QRegExp("("+machine.pattern()+")\\(([0-9]+)\\)");
+const static QRegExp machine_instance = QRegExp("("+machine.pattern()+")");
 const static QRegExp state_spec = QRegExp("("+halt_state+")");
 const static QRegExp state = QRegExp("[a-z]([a-zA-Z0-9_]*)");
 const static QRegExp character_spec = QRegExp("["+blank_character+begin_character+all_character+"]");
 const static QRegExp character = QRegExp("[a-zA-Z0-9]");
 const static QRegExp command = QRegExp("["+left_command+right_command+"]");
 
-const static QRegExp option_line = QRegExp("^(\\s*)("+name_option.pattern()+"|"+init_option.pattern()+"|"+halt_option.pattern()+"|"+tape_option.pattern()+")(\\s+)(\\S+)(\\s*)$");
+const static QRegExp option_line = QRegExp(QString("^(\\s*)(")
+                                           +"("+name_option.pattern()+")(\\s+)(\\S+)(\\s*)|"
+                                           +"("+init_option.pattern()+")(\\s+)(\\S+)(\\s*)|"
+                                           +"("+halt_option.pattern()+")(\\s+)(\\S+)(\\s*)|"
+                                           +"("+tape_option.pattern()+")(\\s+)(\\S+)(\\s*)|"
+                                           +"("+include_option.pattern()+")(\\s+)(\\S+)(\\s+)(\\S+)(\\s*)|"
+                                           +")$");
 //Lines
 const static QRegExp comment = QRegExp("^((//(.*))|(/\\*(.*)\\*/))$"/*|(#(.*))*/);
 const static QRegExp white_line = QRegExp("^(\\s*)$");

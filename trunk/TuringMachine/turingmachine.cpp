@@ -62,6 +62,9 @@ void TuringMachine::clear()
         }
     }
 
+    foreach(TMInstance *m,related_machines){
+        delete m;
+    }
     related_machines.clear();
 
     //History
@@ -76,10 +79,10 @@ void TuringMachine::state_add(const QString name)
 
 }
 
-void TuringMachine::machine_add(const QString name)
+void TuringMachine::machine_add(const QString alias, const QString name)
 {
-    if(!related_machines.contains(name)){
-        related_machines.push_back(name);
+    if(!related_machines.contains(alias)){
+        related_machines.insert(alias, new TMInstance(alias,machine_map[name]));
     }
 }
 
@@ -178,7 +181,8 @@ bool TuringMachine::step()
     //Current command is a running machine
     if( current_state_is_machine ){
         qDebug() << "current machine is machine" << current_state;
-        if( TuringMachine::machine_map[current_state] && !TuringMachine::machine_map[current_state]->halted ){
+        //if( TuringMachine::machine_map[current_state] && !TuringMachine::machine_map[current_state]->halted ){
+        if( related_machines.contains(current_state) && !related_machines[current_state]->halted ){
             TuringMachine::machine_map[current_state]->step();
             emit current_state_signal(current_state+": "+TuringMachine::machine_map[current_state]->current_state);
             emit current_tape_signal(QString(this->machine_tape).insert(machine_head+1,"</b></font>").insert(machine_head,"<font color='#f00'><b>"));
@@ -333,6 +337,16 @@ void TuringMachine::process(const QTextDocument *document)
                     launch_error(block.blockNumber(),"tape defined twice");
                 }
                 // invalid option.
+            }else if(io_ex::include_option.exactMatch(arg[0])){
+                if(machine_map.contains(arg[2])){
+                    if(!related_machines.contains(arg[1])){
+                        machine_add(arg[1],arg[2]);
+                    }else{
+                        launch_error(block.blockNumber(),"alias already defined");
+                    }
+                }else{
+                    launch_error(block.blockNumber(),"unexistant machine");
+                }
             }else{
                 launch_error(block.blockNumber(),"unexistent option");
             }
@@ -364,11 +378,10 @@ void TuringMachine::process(const QTextDocument *document)
             if(io_ex::state.exactMatch(arg[0]) || io_ex::state_spec.exactMatch(arg[0])){
                 state_add(arg[0]);
             }else{
-                if(!machine_map.contains(arg[0])){
-                    launch_error(block.blockNumber(),"unexistent machine (first argument)");
+                if(!related_machines.contains(arg[0])){
+                    launch_error(block.blockNumber(),"unexistent machine instance (first argument)");
                     break;
                 }
-                machine_add(arg[0]);
             }
 
             character_add(arg[1]);
@@ -376,11 +389,10 @@ void TuringMachine::process(const QTextDocument *document)
             if(io_ex::state.exactMatch(arg[2]) || io_ex::state_spec.exactMatch(arg[2])){
                 state_add(arg[2]);
             }else{
-                if(!machine_map.contains(arg[2])){
-                    launch_error(block.blockNumber(),"unexistent machine (second argument)");
+                if(!related_machines.contains(arg[2])){
+                    launch_error(block.blockNumber(),"unexistent machine instance (second argument)");
                     break;
                 }
-                machine_add(arg[2]);
             }
             if(arg.size()>3){
                 if(arg[3]!=io_ex::left_command && arg[3]!=io_ex::right_command){
@@ -469,8 +481,8 @@ void TuringMachine::process(const QTextDocument *document)
     outstr +="}<br>";
 
     outstr += "Related Machines = {";
-    foreach(QString s, related_machines){
-        outstr += s+", ";
+    foreach(TMInstance *m, related_machines){
+        outstr += m->name+", ";
     }
     outstr +="}";
 
