@@ -27,19 +27,20 @@ TuringMachine::TuringMachine(QString program, QObject *parent) :
         name = QString("%1_%2").arg(name).arg(count);
     }
     emit debug_message( "adding " + name);
-    process(program);
+    process();
     machine_step_max = 1000;
     machine_map.insert(name,this);
 }
 
-TuringMachine::TuringMachine(QString alias, TuringMachine *tm)
+TuringMachine::TuringMachine(QString alias, TuringMachine *tm):
+    QObject(tm)
 {
     root_machine = false;
     this->name = "New";
     this->alias = alias;
     this->default_tape = "";
-
-    this->process(tm->gen_resulting_code());
+    this->program = tm->gen_resulting_code();
+    this->process();
     machine_step_max = 1000;
 
 //    this->setParent(tm);
@@ -232,7 +233,7 @@ bool TuringMachine::step()
         //if( TuringMachine::machine_map[current_state] && !TuringMachine::machine_map[current_state]->halted ){
         if( related_machines.contains(current_state) && !related_machines[current_state]->halted ){
             bool res = related_machines[current_state]->step();
-            emit current_state_signal(current_state+": "+related_machines[current_state]->current_state);
+            emit current_state_signal(related_machines[current_state]->current_state+"_"+current_state);
             emit current_tape_signal(QString(this->machine_tape).insert(machine_head+1,"</b></font>").insert(machine_head,"<font color='#f00'><b>"));
             emit current_step_signal(QString::number(machine_step_count));
             return res;
@@ -259,7 +260,7 @@ bool TuringMachine::step()
         //qDebug() << "transforming into machine execution";
         current_state_is_machine = true;
         related_machines[current_state]->reset_execution();
-        emit current_state_signal(current_state+": "+related_machines[current_state]->current_state);
+        emit current_state_signal(related_machines[current_state]->current_state+"_"+current_state);
         emit current_tape_signal(QString(this->machine_tape).insert(machine_head+1,"</b></font>").insert(machine_head,"<font color='#f00'><b>"));
         emit current_step_signal(QString::number(machine_step_count));
         return true;
@@ -311,9 +312,9 @@ void TuringMachine::back_step()
     //    }
 }
 
-void TuringMachine::process(const QString text)
+void TuringMachine::process()
 {
-    QTextDocument *doc = new QTextDocument(text);
+    QTextDocument *doc = new QTextDocument(program);
     process(doc);
     delete doc;
 }
@@ -343,10 +344,10 @@ void TuringMachine::process(const QTextDocument *document)
             arg = line.split(QRegExp("(\\s+)"),QString::SkipEmptyParts);
             // #name - defines machine name. only one allowed per program.
             if(io_ex::name_option.exactMatch(arg[0])){
-                if(!name_defined || !root_machine){
+                if(!name_defined && root_machine){
                     name_defined = true;
                     if(TuringMachine::machine_map.contains(arg[1]) && TuringMachine::machine_map[arg[1]]!=this){
-                        qDebug() << "this machine already exists";
+//                        qDebug() << "this machine already exists";
                         launch_error(block.blockNumber(),"this machine already exists");
                         break;
                     }
@@ -357,6 +358,9 @@ void TuringMachine::process(const QTextDocument *document)
                         machine_current_machine = this->name;
                         emit rename_event();
                     }
+                }else if(!name_defined && !root_machine){
+                    name_defined = true;
+                    this->name = arg[1];
                 }else{
                     launch_error(block.blockNumber(),"name already defined");
                 }
@@ -564,9 +568,9 @@ void TuringMachine::process(const QTextDocument *document)
     emit current_step_signal(QString::number(machine_step_count));
     emit current_description_signal(outstr);
 
-    qDebug() << "finished processing" << alias << name << state_first;
-    qDebug() << program;
-    qDebug() << "=======================" << gen_resulting_code();
+//    qDebug*/() << "finished processing" << alias << name << state_first;
+//    qDebug() << program;
+//    qDebug() << "=======================" << gen_resulting_code();
 }
 
 QString TuringMachine::gen_machine_code()
@@ -595,9 +599,11 @@ QString TuringMachine::gen_resulting_code()
     }
 
     foreach(TuringMachine *m,related_machines){
-        output += "//"+m->alias+"("+m->name+") code\r\n";
-        output += "//program:\r\n"+m->program+"\r\n//program_end\r\n";
+        output += "//RELATED CODE: "+m->alias+"("+m->name+") code\r\n";
+        //output += m->program;
+        //output += "//RESULTING CODE:\r\n";
         output += m->gen_resulting_code();
+        output += "//END\r\n";
     }
 
     if(root_machine){
