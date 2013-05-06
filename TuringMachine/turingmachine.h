@@ -71,7 +71,7 @@ signals:
 
     void rename_event();
 public slots:
-    void process(const QString text);
+    void process();
     void process(const QTextDocument *document);
 
     QString gen_machine_code();
