@@ -11,6 +11,8 @@
 #include <QScrollBar>
 #include <QFileDialog>
 
+#include <QSettings>
+
 MainWindow::MainWindow(QWidget *parent) :
     QMainWindow(parent),
     ui(new Ui::MainWindow)
@@ -56,7 +58,7 @@ MainWindow::MainWindow(QWidget *parent) :
 
     create_machine("#name Ra\n#tape bbbbba\n#have R R\n//RBlank machine\ns * R *\nR * R *\nR a halt *\n");
 
-    create_machine("#name Sright\n\n#tape abb\n\n#have RB RBlank\n#have L1 L\n#have L0 L\n#have Ra R\n#have Rb R\n\ns * RB *\nRB * L0 *\nL0 # halt *\nL0 a ea #\nL0 b eb #\nea * Ra *\neb * RB *\nRa * wa a\nRb * wb b\nwa * L1 *\nwb * L1 *\nL1 * L0 *\n\n\n");
+    create_machine("#name Sright\n\n#tape #abb\n\n#have RB RBlank\n#have L1 L\n#have L0 L\n#have Ra R\n#have Rb R\n\ns * RB *\nRB * L0 *\nL0 # halt *\nL0 a ea #\nL0 b eb #\nea * Ra *\neb * Rb *\nRa * wa a\nRb * wb b\nwa * L1 *\nwb * L1 *\nL1 * L0 *\n\n\n");
 
     create_machine("");
 
@@ -84,11 +86,36 @@ MainWindow::MainWindow(QWidget *parent) :
     connect(ui->push_remove,SIGNAL(clicked()),this,SLOT(remove_machine()));
 
     connect(ui->pushButton,SIGNAL(clicked()),this,SLOT(show_current_machine_code()));
+
+    readSettings();
 }
 
 MainWindow::~MainWindow()
 {
     delete ui;
+}
+
+void MainWindow::readSettings()
+{
+    QSettings settings("settings.ini",QSettings::IniFormat);
+    settings.beginGroup("MainWindow");
+    resize(settings.value("size").toSize());
+    move(settings.value("pos").toPoint());
+    settings.endGroup();
+}
+
+void MainWindow::writeSettings()
+{
+    QSettings settings("settings.ini",QSettings::IniFormat);
+    settings.beginGroup("MainWindow");
+    settings.setValue("size", size());
+    settings.setValue("pos", pos());
+    settings.endGroup();
+}
+
+void MainWindow::closeEvent(QCloseEvent *)
+{
+    writeSettings();
 }
 
 void MainWindow::process_text() const
@@ -193,7 +220,7 @@ void MainWindow::machine_rename_handler()
 void MainWindow::save_machine()
 {
     QString filename;
-    filename = QFileDialog::getSaveFileName(this,"Save File","","Text File (*.txt);;Turing Machine (*.mt)");
+    filename = QFileDialog::getSaveFileName(this,"Save File","","Turing Machine (*.tm);;Text File (*.txt)");
     if( filename=="" ) return;
     QFile outfile(filename);
     if( !outfile.open( QIODevice::Append | QIODevice::Text ) ) return;
@@ -204,12 +231,14 @@ void MainWindow::save_machine()
 void MainWindow::load_machine()
 {
     QString filename;
-    filename = QFileDialog::getOpenFileName(this,"Open File","","Text File (*.txt);;Turing Machine (*.mt)");
+    filename = QFileDialog::getOpenFileName(this,"Open File","","Turing Machine (*.tm);;Text File (*.txt)");
     if( filename == "" ) return;
     QFile infile(filename);
     if( !infile.open( QIODevice::ReadOnly | QIODevice::Text )) return;
     QTextStream in(&infile);
-    ui->machine_input->setText( in.readAll() );
+    //ui->comboBox->addItem("new");
+    create_machine(in.readAll());
+    //ui->machine_input->setText( in.readAll() );
 }
 
 void MainWindow::add_machine()
@@ -223,6 +252,7 @@ void MainWindow::add_machine()
 void MainWindow::remove_machine()
 {
     if(ui->comboBox->currentIndex()!=0){
+        TuringMachine::machine_remove(ui->comboBox->currentText());
         ui->comboBox->removeItem(ui->comboBox->currentIndex());
         set_current_machine(ui->comboBox->currentText());
     }

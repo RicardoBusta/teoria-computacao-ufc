@@ -56,6 +56,7 @@ public:
     static int machine_step_max;
 
     static TuringMachine* get();
+    static void machine_remove(QString machine_name);
 
     void clear();
     void reset_execution();

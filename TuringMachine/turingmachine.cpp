@@ -206,6 +206,14 @@ TuringMachine *TuringMachine::get()
     return machine_map[machine_current_machine];
 }
 
+void TuringMachine::machine_remove(QString machine_name)
+{
+    if(machine_map[machine_name]){
+        delete machine_map[machine_name];
+        machine_map.remove(machine_name);
+    }
+}
+
 bool TuringMachine::step()
 {
     //qDebug() << alias << "step" << machine_step_count;
