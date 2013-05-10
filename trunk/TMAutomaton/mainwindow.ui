@@ -53,13 +53,20 @@
      </layout>
     </item>
     <item>
-     <widget class="DragWidget" name="widget" native="true">
-      <property name="sizePolicy">
-       <sizepolicy hsizetype="Preferred" vsizetype="Expanding">
-        <horstretch>0</horstretch>
-        <verstretch>0</verstretch>
-       </sizepolicy>
+     <widget class="QScrollArea" name="scrollArea">
+      <property name="widgetResizable">
+       <bool>true</bool>
       </property>
+      <widget class="DragWidget" name="widget">
+       <property name="geometry">
+        <rect>
+         <x>0</x>
+         <y>0</y>
+         <width>380</width>
+         <height>196</height>
+        </rect>
+       </property>
+      </widget>
      </widget>
     </item>
    </layout>
