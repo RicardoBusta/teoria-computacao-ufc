@@ -20,6 +20,11 @@ public:
 private:
   Ui::MainWindow *ui;
 
+  void readSettings();
+  void writeSettings();
+
+  void closeEvent(QCloseEvent *);
+
 public slots:
   void process_text() const;
   void step_machine() const;
