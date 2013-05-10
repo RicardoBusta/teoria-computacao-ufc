@@ -26,6 +26,14 @@ public:
 
     DRAG_TOOLS current_tool;
     QPointF anchor;
+    bool multipleSelect;
+    QPoint mousePos;
+    QRect multipleSelectRect;
+    QPoint mousePrev;
+
+    QRectF container;
+
+    QList<DragElement*> selectedElements;
 
     DragElement *pick_element(QPointF epos);
 signals:

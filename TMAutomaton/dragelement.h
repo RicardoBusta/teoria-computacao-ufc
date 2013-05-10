@@ -10,7 +10,6 @@ public:
     explicit DragElement(QPointF pos);
 
     QPointF pos;
-    QRectF rect;
     float radius;
     QString txt;
 };
