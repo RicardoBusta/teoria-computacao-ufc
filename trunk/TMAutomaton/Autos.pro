@@ -4,7 +4,7 @@
 #
 #-------------------------------------------------
 
-QT       += core gui opengl
+QT       += core gui svg
 
 greaterThan(QT_MAJOR_VERSION, 4): QT += widgets
 
@@ -16,11 +16,13 @@ SOURCES += main.cpp\
         mainwindow.cpp \
     dragwidget.cpp \
     dragelement.cpp \
-    dragedge.cpp
+    dragedge.cpp \
+    dragstate.cpp
 
 HEADERS  += mainwindow.h \
     dragwidget.h \
     dragelement.h \
-    dragedge.h
+    dragedge.h \
+    dragstate.h
 
 FORMS    += mainwindow.ui

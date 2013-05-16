@@ -50,6 +50,31 @@
         </property>
        </widget>
       </item>
+      <item>
+       <widget class="QPushButton" name="pushButton">
+        <property name="text">
+         <string>Rename</string>
+        </property>
+       </widget>
+      </item>
+     </layout>
+    </item>
+    <item>
+     <layout class="QHBoxLayout" name="horizontalLayout">
+      <item>
+       <widget class="QPushButton" name="pushButton_3">
+        <property name="text">
+         <string>Set Start</string>
+        </property>
+       </widget>
+      </item>
+      <item>
+       <widget class="QPushButton" name="pushButton_2">
+        <property name="text">
+         <string>Toggle Final</string>
+        </property>
+       </widget>
+      </item>
      </layout>
     </item>
     <item>
@@ -63,7 +88,7 @@
          <x>0</x>
          <y>0</y>
          <width>380</width>
-         <height>196</height>
+         <height>165</height>
         </rect>
        </property>
       </widget>

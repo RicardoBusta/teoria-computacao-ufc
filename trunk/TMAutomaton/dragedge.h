@@ -2,13 +2,16 @@
 #define DRAGEDGE_H
 
 #include "dragelement.h"
+#include "dragstate.h"
 
-class DragEdge
+class DragEdge:public DragElement
 {
 public:
-    DragEdge(DragElement *e1, DragElement *e2);
+    DragEdge(DragState *e1, DragState *e2);
 
-    DragElement *e1, *e2;
+    DragState *e1, *e2;
+
+    bool pick(QPoint);
 };
 
 #endif // DRAGEDGE_H

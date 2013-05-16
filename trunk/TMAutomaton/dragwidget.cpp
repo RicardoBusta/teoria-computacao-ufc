@@ -7,47 +7,20 @@
 #include <qmath.h>
 
 DragWidget::DragWidget(QWidget *parent) :
-    QWidget(parent),
+    QWidget(parent),iniState(NULL),
     current_tool(TOOL_CREATE),selected(NULL),multipleSelect(false)
 {
-    this->setFixedSize(1000,1000);
+    this->setFixedSize(500,500);
+    container = QRect(0,0,width(),height());
 }
 
 void DragWidget::paintEvent(QPaintEvent *)
 {
-    container = QRect(0,0,500,500);
-    foreach(DragElement *el, element){
-        if( (el->pos.x()-el->radius)<container.left() ){
-            container.setLeft( (el->pos.x()-el->radius) );
-        }
-        if( (el->pos.x()+el->radius)>container.right() ){
-            container.setRight( (el->pos.x()+el->radius) );
-        }
-        if( (el->pos.y()-el->radius)<container.top() ){
-            container.setTop( (el->pos.y()-el->radius) );
-        }
-        if( (el->pos.y()+el->radius)>container.bottom() ){
-            container.setBottom( (el->pos.y()+el->radius) );
-        }
-    }
-
-    foreach(DragElement *el, element){
-        el->pos = el->pos - container.topLeft();
-    }
-
-    this->setFixedSize(container.adjusted(-20,-20,20,20).size().toSize());
-
     QPainter painter(this);
-
-
 
     painter.setPen(Qt::NoPen);
     painter.setBrush(Qt::white);
     painter.drawRect(rect());
-
-    painter.setPen(Qt::black);
-    painter.setBrush(Qt::NoBrush);
-    painter.drawRect(container);
 
     painter.setRenderHint(QPainter::Antialiasing,true);
     painter.setRenderHint(QPainter::TextAntialiasing,true);
@@ -58,11 +31,30 @@ void DragWidget::paintEvent(QPaintEvent *)
     foreach(DragEdge *ed,edge){
         if(ed->e1 && ed->e2){
             if(ed->e1 != ed->e2){
+
+//                QPointF pteste[4];
+//                if(ed->e1->pos.x() < ed->e2->pos.x()){
+//                    pteste[0] = ed->e1->pos + QPointF(-10,0);
+//                    pteste[2] = ed->e2->pos + QPointF(10,0);
+//                }else{
+//                    pteste[0] = ed->e1->pos + QPointF(10,0);
+//                    pteste[2] = ed->e2->pos + QPointF(-10,0);
+//                }
+//                if(ed->e1->pos.y() < ed->e2->pos.y()){
+//                    pteste[1] = ed->e1->pos + QPointF(0,-10);
+//                    pteste[3] = ed->e2->pos + QPointF(0,10);
+//                }else{
+//                    pteste[1] = ed->e1->pos + QPointF(0,10);
+//                    pteste[3] = ed->e2->pos + QPointF(0,-10);
+//                }
+//                painter.setBrush(Qt::yellow);
+//                painter.setPen(Qt::black);
+//                painter.drawPolygon(pteste,4);
+
                 painter.setBrush(Qt::NoBrush);
                 painter.setPen(Qt::black);
                 QVector2D v1(ed->e1->pos-ed->e2->pos);
-                //            int len = v1.length();
-                //            float ang = atan(v1.y()/v1.x())*180/M_PI;
+
                 v1.normalize();
                 QVector2D v2(ed->e2->pos-ed->e1->pos);
                 v2.normalize();
@@ -96,11 +88,16 @@ void DragWidget::paintEvent(QPaintEvent *)
         }
     }
 
-    painter.setBrush(Qt::NoBrush);
-    painter.setPen(Qt::cyan);
-    painter.drawRect(multipleSelectRect);
+    foreach(DragState *el,state){
+        QPointF p[3];
+        if(iniState==el){
 
-    foreach(DragElement *el,element){
+            p[0] = el->pos+QPointF(-el->radius,0);
+            p[1] = el->pos+QPointF(-el->radius-20,20);
+            p[1] = el->pos+QPointF(-el->radius-20,-20);
+        }
+        painter.drawPolygon(p,3);
+
         painter.setPen(Qt::NoPen);
         if(el == selected || selectedElements.contains(el)){
             painter.setBrush(Qt::cyan);
@@ -116,18 +113,26 @@ void DragWidget::paintEvent(QPaintEvent *)
         painter.drawText(rect,el->txt,Qt::AlignVCenter|Qt::AlignHCenter);
     }
 
+    painter.setBrush(Qt::NoBrush);
+    painter.setPen(Qt::cyan);
+    painter.drawRect(multipleSelectRect);
+
     painter.end();
 }
 
 void DragWidget::mousePressEvent(QMouseEvent *e)
 {
+    DragElement *ele;
 
     switch(current_tool){
     case TOOL_CREATE:
-        element.push_back(new DragElement(e->pos()));
+        state.push_back(new DragState(e->pos()));
         break;
     case TOOL_MOVE:
-        selected = pick_element(e->pos());
+        ele = pick_element(e->pos());
+        if(ele && ele->type==DRAG_STATE){
+            selected = dynamic_cast<DragState*>(ele);
+        }
         if(!selected){
             selectedElements.clear();
             multipleSelect = true;
@@ -137,18 +142,24 @@ void DragWidget::mousePressEvent(QMouseEvent *e)
             selectedElements.clear();
             mousePos = e->pos();
         }
+
         mousePrev = e->pos();
         break;
     case TOOL_LINK:
         if(selected){
-            DragElement *sel2 = pick_element(e->pos());
+            DragState *sel2 = dynamic_cast<DragState*>(pick_element(e->pos()));
             //            if(selected!=sel2){
             edge.push_back(new DragEdge(selected,sel2));
             selected = NULL;
             //            }
         }else{
-            selected = pick_element(e->pos());
+            ele = pick_element(e->pos());
+            if(ele && ele->type==DRAG_STATE){
+                selected = static_cast<DragState*>(ele);
+            }
         }
+        break;
+    case TOOL_RENAME:
         break;
     default:
         return;
@@ -156,8 +167,27 @@ void DragWidget::mousePressEvent(QMouseEvent *e)
     this->repaint();
 }
 
-void DragWidget::mouseReleaseEvent(QMouseEvent *)
+#include <QInputDialog>
+
+void DragWidget::mouseReleaseEvent(QMouseEvent *e)
 {
+    DragElement *ele;
+    QInputDialog *dialog;
+
+    foreach(DragState *st, state){
+        if(container.left() > st->pos.x()-st->radius){
+            st->pos.setX(container.left()+(st->radius+10));
+        }else if(container.right() < st->pos.x()+st->radius){
+            st->pos.setX(container.right()-(st->radius+10));
+        }
+
+        if(container.top() > st->pos.y()-st->radius){
+            st->pos.setY(container.top()+(st->radius+10));
+        }else if(container.bottom() < st->pos.y()+st->radius){
+            st->pos.setY(container.bottom()-(st->radius+10));
+        }
+    }
+
     switch(current_tool){
     case TOOL_CREATE:
         break;
@@ -165,6 +195,25 @@ void DragWidget::mouseReleaseEvent(QMouseEvent *)
         multipleSelect = false;
         multipleSelectRect.setRect(0,0,0,0);
         selected = NULL;
+        break;
+    case TOOL_RENAME:
+        ele = pick_element(e->pos());
+        if(!ele) break;
+
+        dialog = new QInputDialog(this);
+        if(dialog->exec()==QDialog::Accepted){
+            switch(ele->type){
+            case DRAG_EDGE:
+                //static_cast<DragEdge*>(ele)
+                break;
+            case DRAG_STATE:
+                static_cast<DragState*>(ele)->txt = dialog->textValue();
+                break;
+            default:
+                break;
+            }
+        }
+        delete dialog;
         break;
     default:
         return;
@@ -181,7 +230,7 @@ void DragWidget::mouseMoveEvent(QMouseEvent *e)
     case TOOL_MOVE:
         if(multipleSelect){
             multipleSelectRect = QRect( QPoint( qMin(mousePos.x(),e->pos().x()),qMin( mousePos.y(),e->pos().y()) ), QPoint( qMax(mousePos.x(),e->pos().x()),qMax(mousePos.y(),e->pos().y()) ) );
-            foreach(DragElement* el, element){
+            foreach(DragState* el, state){
                 if( el->pos.x() < multipleSelectRect.right() && el->pos.x() > multipleSelectRect.left() && el->pos.y() > multipleSelectRect.top() && el->pos.y() < multipleSelectRect.bottom() ){
                     if(!selectedElements.contains(el)){
                         selectedElements.push_back(el);
@@ -205,19 +254,22 @@ void DragWidget::mouseMoveEvent(QMouseEvent *e)
             selected->pos = e->pos() - anchor;
         }
         break;
+    case TOOL_LINK:
+        break;
+    case TOOL_RENAME:
+        break;
     default:
         return;
     }
     this->repaint();
 }
 
-DragElement *DragWidget::pick_element(QPointF epos)
+DragElement *DragWidget::pick_element(QPoint epos)
 {
     DragElement *ele = NULL;
-    foreach(DragElement *el,element){
-        QPointF delta = epos - el->pos;
-        if( (delta.x()*delta.x()) + (delta.y()*delta.y()) <= el->radius*el->radius ){
-            anchor = delta;
+    foreach(DragState *el,state){
+        if(el->pick(epos)){
+            anchor = epos-el->pos;
             ele = el;
         }
     }
@@ -243,4 +295,11 @@ void DragWidget::setLinkTool()
     current_tool = TOOL_LINK;
     selected = NULL;
     this->setCursor(Qt::SizeAllCursor);
+}
+
+void DragWidget::setRenameTool()
+{
+    current_tool = TOOL_RENAME;
+    selected = NULL;
+    this->setCursor(Qt::IBeamCursor);
 }
