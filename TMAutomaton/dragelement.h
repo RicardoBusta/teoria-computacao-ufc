@@ -5,13 +5,17 @@
 #include <QRectF>
 #include <QString>
 
+enum DRAG_{DRAG_STATE,DRAG_EDGE};
+
 class DragElement{
 public:
-    explicit DragElement(QPointF pos);
+    explicit DragElement():pos(QPointF(0,0)){}
+
+    DRAG_ type;
 
     QPointF pos;
-    float radius;
-    QString txt;
+
+    virtual bool pick(QPoint)=0;
 };
 
 

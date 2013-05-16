@@ -5,8 +5,9 @@
 
 #include "dragelement.h"
 #include "dragedge.h"
+#include "dragstate.h"
 
-enum DRAG_TOOLS{TOOL_CREATE,TOOL_MOVE,TOOL_LINK};
+enum DRAG_TOOLS{TOOL_CREATE,TOOL_MOVE,TOOL_LINK,TOOL_RENAME};
 
 class DragWidget : public QWidget
 {
@@ -17,12 +18,13 @@ public:
     void paintEvent(QPaintEvent *);
 
     void mousePressEvent(QMouseEvent *e);
-    void mouseReleaseEvent(QMouseEvent *);
+    void mouseReleaseEvent(QMouseEvent *e);
     void mouseMoveEvent(QMouseEvent *);
 
-    QList<DragElement*> element;
+    DragState *iniState;
+    QList<DragState*> state;
     QList<DragEdge*> edge;
-    DragElement *selected;
+    DragState *selected;
 
     DRAG_TOOLS current_tool;
     QPointF anchor;
@@ -35,13 +37,14 @@ public:
 
     QList<DragElement*> selectedElements;
 
-    DragElement *pick_element(QPointF epos);
+    DragElement *pick_element(QPoint epos);
 signals:
     
 public slots:
     void setCreateTool();
     void setMoveTool();
     void setLinkTool();
+    void setRenameTool();
 };
 
 #endif // DRAGWIDGET_H
