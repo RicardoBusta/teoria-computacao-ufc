@@ -7,7 +7,7 @@ DragState::DragState(QPointF pos):
 
     this->pos = pos;
     static int count=0;
-    txt = QString("TEST_%1").arg(count++);
+    txt = QString("q%1").arg(count++);
 }
 
 bool DragState::pick(QPoint epos)

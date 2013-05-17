@@ -6,8 +6,8 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>400</width>
-    <height>300</height>
+    <width>568</width>
+    <height>468</height>
    </rect>
   </property>
   <property name="windowTitle">
@@ -18,9 +18,22 @@
     <item>
      <layout class="QHBoxLayout" name="horizontalLayout_2">
       <item>
-       <widget class="QPushButton" name="pushButton_move">
+       <widget class="QToolButton" name="toolButton_move">
+        <property name="toolTip">
+         <string>Move</string>
+        </property>
         <property name="text">
          <string>Move</string>
+        </property>
+        <property name="icon">
+         <iconset resource="cursor/cursor.qrc">
+          <normaloff>:/move.svg</normaloff>:/move.svg</iconset>
+        </property>
+        <property name="iconSize">
+         <size>
+          <width>30</width>
+          <height>30</height>
+         </size>
         </property>
         <property name="checkable">
          <bool>false</bool>
@@ -28,15 +41,25 @@
         <property name="checked">
          <bool>false</bool>
         </property>
-        <property name="flat">
-         <bool>false</bool>
-        </property>
        </widget>
       </item>
       <item>
-       <widget class="QPushButton" name="pushButton_create">
+       <widget class="QToolButton" name="toolButton_create">
+        <property name="toolTip">
+         <string>Create</string>
+        </property>
         <property name="text">
          <string>Create</string>
+        </property>
+        <property name="icon">
+         <iconset resource="cursor/cursor.qrc">
+          <normaloff>:/create.svg</normaloff>:/create.svg</iconset>
+        </property>
+        <property name="iconSize">
+         <size>
+          <width>30</width>
+          <height>30</height>
+         </size>
         </property>
         <property name="checkable">
          <bool>false</bool>
@@ -44,34 +67,82 @@
        </widget>
       </item>
       <item>
-       <widget class="QPushButton" name="pushButton_link">
+       <widget class="QToolButton" name="toolButton_link">
+        <property name="toolTip">
+         <string>Link</string>
+        </property>
         <property name="text">
          <string>Link</string>
         </property>
-       </widget>
-      </item>
-      <item>
-       <widget class="QPushButton" name="pushButton">
-        <property name="text">
-         <string>Rename</string>
+        <property name="icon">
+         <iconset resource="cursor/cursor.qrc">
+          <normaloff>:/link.svg</normaloff>:/link.svg</iconset>
+        </property>
+        <property name="iconSize">
+         <size>
+          <width>30</width>
+          <height>30</height>
+         </size>
         </property>
        </widget>
       </item>
-     </layout>
-    </item>
-    <item>
-     <layout class="QHBoxLayout" name="horizontalLayout">
       <item>
-       <widget class="QPushButton" name="pushButton_3">
+       <widget class="QToolButton" name="toolButton_final">
+        <property name="toolTip">
+         <string>Halt</string>
+        </property>
+        <property name="text">
+         <string>Toggle Final</string>
+        </property>
+        <property name="icon">
+         <iconset resource="cursor/cursor.qrc">
+          <normaloff>:/halt.svg</normaloff>:/halt.svg</iconset>
+        </property>
+        <property name="iconSize">
+         <size>
+          <width>30</width>
+          <height>30</height>
+         </size>
+        </property>
+       </widget>
+      </item>
+      <item>
+       <widget class="QToolButton" name="toolButton_start">
+        <property name="toolTip">
+         <string>Start</string>
+        </property>
         <property name="text">
          <string>Set Start</string>
         </property>
+        <property name="icon">
+         <iconset resource="cursor/cursor.qrc">
+          <normaloff>:/first.svg</normaloff>:/first.svg</iconset>
+        </property>
+        <property name="iconSize">
+         <size>
+          <width>30</width>
+          <height>30</height>
+         </size>
+        </property>
        </widget>
       </item>
       <item>
-       <widget class="QPushButton" name="pushButton_2">
+       <widget class="QToolButton" name="toolButton_rename">
+        <property name="toolTip">
+         <string>Rename</string>
+        </property>
         <property name="text">
-         <string>Toggle Final</string>
+         <string>Rename</string>
+        </property>
+        <property name="icon">
+         <iconset resource="cursor/cursor.qrc">
+          <normaloff>:/rename.svg</normaloff>:/rename.svg</iconset>
+        </property>
+        <property name="iconSize">
+         <size>
+          <width>30</width>
+          <height>30</height>
+         </size>
         </property>
        </widget>
       </item>
@@ -87,8 +158,8 @@
         <rect>
          <x>0</x>
          <y>0</y>
-         <width>380</width>
-         <height>165</height>
+         <width>548</width>
+         <height>351</height>
         </rect>
        </property>
       </widget>
@@ -101,10 +172,18 @@
     <rect>
      <x>0</x>
      <y>0</y>
-     <width>400</width>
+     <width>568</width>
      <height>21</height>
     </rect>
    </property>
+   <widget class="QMenu" name="menuFile">
+    <property name="title">
+     <string>File</string>
+    </property>
+    <addaction name="actionExit"/>
+    <addaction name="actionSave_SVG"/>
+   </widget>
+   <addaction name="menuFile"/>
   </widget>
   <widget class="QToolBar" name="mainToolBar">
    <attribute name="toolBarArea">
@@ -115,6 +194,16 @@
    </attribute>
   </widget>
   <widget class="QStatusBar" name="statusBar"/>
+  <action name="actionExit">
+   <property name="text">
+    <string>Exit</string>
+   </property>
+  </action>
+  <action name="actionSave_SVG">
+   <property name="text">
+    <string>Save SVG</string>
+   </property>
+  </action>
  </widget>
  <layoutdefault spacing="6" margin="11"/>
  <customwidgets>
@@ -125,6 +214,8 @@
    <container>1</container>
   </customwidget>
  </customwidgets>
- <resources/>
+ <resources>
+  <include location="cursor/cursor.qrc"/>
+ </resources>
  <connections/>
 </ui>

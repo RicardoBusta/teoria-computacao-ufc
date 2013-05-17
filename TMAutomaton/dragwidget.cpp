@@ -5,6 +5,9 @@
 #include <QMouseEvent>
 #include <QVector2D>
 #include <qmath.h>
+#include <QSvgGenerator>
+
+#include "staticresource.h"
 
 DragWidget::DragWidget(QWidget *parent) :
     QWidget(parent),iniState(NULL),
@@ -16,108 +19,7 @@ DragWidget::DragWidget(QWidget *parent) :
 
 void DragWidget::paintEvent(QPaintEvent *)
 {
-    QPainter painter(this);
-
-    painter.setPen(Qt::NoPen);
-    painter.setBrush(Qt::white);
-    painter.drawRect(rect());
-
-    painter.setRenderHint(QPainter::Antialiasing,true);
-    painter.setRenderHint(QPainter::TextAntialiasing,true);
-
-    float sint = sin(-30*M_PI/180);
-    float cost = cos(-30*M_PI/180);
-
-    foreach(DragEdge *ed,edge){
-        if(ed->e1 && ed->e2){
-            if(ed->e1 != ed->e2){
-
-//                QPointF pteste[4];
-//                if(ed->e1->pos.x() < ed->e2->pos.x()){
-//                    pteste[0] = ed->e1->pos + QPointF(-10,0);
-//                    pteste[2] = ed->e2->pos + QPointF(10,0);
-//                }else{
-//                    pteste[0] = ed->e1->pos + QPointF(10,0);
-//                    pteste[2] = ed->e2->pos + QPointF(-10,0);
-//                }
-//                if(ed->e1->pos.y() < ed->e2->pos.y()){
-//                    pteste[1] = ed->e1->pos + QPointF(0,-10);
-//                    pteste[3] = ed->e2->pos + QPointF(0,10);
-//                }else{
-//                    pteste[1] = ed->e1->pos + QPointF(0,10);
-//                    pteste[3] = ed->e2->pos + QPointF(0,-10);
-//                }
-//                painter.setBrush(Qt::yellow);
-//                painter.setPen(Qt::black);
-//                painter.drawPolygon(pteste,4);
-
-                painter.setBrush(Qt::NoBrush);
-                painter.setPen(Qt::black);
-                QVector2D v1(ed->e1->pos-ed->e2->pos);
-
-                v1.normalize();
-                QVector2D v2(ed->e2->pos-ed->e1->pos);
-                v2.normalize();
-                QPointF p[4];
-                p[0] = ed->e1->pos-(ed->e1->radius*v1.toPointF());
-                p[1] = ed->e2->pos-(ed->e2->radius*v2.toPointF());
-                painter.drawLine(p[0],p[1]);
-
-                painter.drawText(((p[0]+p[1])/2),"HMM");
-
-                p[2] = p[1]+(20*QPointF(v1.x()*cost-v1.y()*sint,v1.x()*sint+v1.y()*cost));
-                p[3] = p[1]+(20*QPointF(v1.x()*cost-v1.y()*(-sint),v1.x()*(-sint)+v1.y()*cost));
-                painter.setBrush(Qt::black);
-                painter.drawPolygon(p+1,3);
-            }else{
-                painter.setPen(Qt::black);
-                painter.setBrush(Qt::NoBrush);
-                painter.drawEllipse(ed->e1->pos+QPointF(0,-30),20,30);
-                painter.drawText(ed->e1->pos+QPointF(0,-60),"HMM");
-
-                QPointF p[3];
-                p[0] = ed->e1->pos+QPointF(-20,-25);
-                p[1] = p[0]+(20*QPointF(+sint,-cost));
-                p[2] = p[0]+(20*QPointF(-sint,-cost));
-                painter.setBrush(Qt::black);
-                painter.drawPolygon(p,3);
-            }
-        }else{
-            delete ed;
-            edge.removeOne(ed);
-        }
-    }
-
-    foreach(DragState *el,state){
-        QPointF p[3];
-        if(iniState==el){
-
-            p[0] = el->pos+QPointF(-el->radius,0);
-            p[1] = el->pos+QPointF(-el->radius-20,20);
-            p[1] = el->pos+QPointF(-el->radius-20,-20);
-        }
-        painter.drawPolygon(p,3);
-
-        painter.setPen(Qt::NoPen);
-        if(el == selected || selectedElements.contains(el)){
-            painter.setBrush(Qt::cyan);
-            painter.drawEllipse(el->pos,el->radius+10,el->radius+10);
-        }
-        painter.setBrush(Qt::black);
-        painter.drawEllipse(el->pos,el->radius+3,el->radius+3);
-        painter.setBrush(Qt::yellow);
-        painter.drawEllipse(el->pos,el->radius,el->radius);
-
-        QRectF rect = QRectF(el->pos-QPointF(el->radius,el->radius),el->pos+QPointF(el->radius,el->radius));
-        painter.setPen(Qt::black);
-        painter.drawText(rect,el->txt,Qt::AlignVCenter|Qt::AlignHCenter);
-    }
-
-    painter.setBrush(Qt::NoBrush);
-    painter.setPen(Qt::cyan);
-    painter.drawRect(multipleSelectRect);
-
-    painter.end();
+    renderScene(this);
 }
 
 void DragWidget::mousePressEvent(QMouseEvent *e)
@@ -126,7 +28,7 @@ void DragWidget::mousePressEvent(QMouseEvent *e)
 
     switch(current_tool){
     case TOOL_CREATE:
-        state.push_back(new DragState(e->pos()));
+
         break;
     case TOOL_MOVE:
         ele = pick_element(e->pos());
@@ -162,7 +64,7 @@ void DragWidget::mousePressEvent(QMouseEvent *e)
     case TOOL_RENAME:
         break;
     default:
-        return;
+        break;
     }
     this->repaint();
 }
@@ -174,22 +76,9 @@ void DragWidget::mouseReleaseEvent(QMouseEvent *e)
     DragElement *ele;
     QInputDialog *dialog;
 
-    foreach(DragState *st, state){
-        if(container.left() > st->pos.x()-st->radius){
-            st->pos.setX(container.left()+(st->radius+10));
-        }else if(container.right() < st->pos.x()+st->radius){
-            st->pos.setX(container.right()-(st->radius+10));
-        }
-
-        if(container.top() > st->pos.y()-st->radius){
-            st->pos.setY(container.top()+(st->radius+10));
-        }else if(container.bottom() < st->pos.y()+st->radius){
-            st->pos.setY(container.bottom()-(st->radius+10));
-        }
-    }
-
     switch(current_tool){
     case TOOL_CREATE:
+        state.push_back(new DragState(e->pos()));
         break;
     case TOOL_MOVE:
         multipleSelect = false;
@@ -201,6 +90,7 @@ void DragWidget::mouseReleaseEvent(QMouseEvent *e)
         if(!ele) break;
 
         dialog = new QInputDialog(this);
+        dialog->setTextValue(static_cast<DragState*>(ele)->txt);
         if(dialog->exec()==QDialog::Accepted){
             switch(ele->type){
             case DRAG_EDGE:
@@ -215,8 +105,35 @@ void DragWidget::mouseReleaseEvent(QMouseEvent *e)
         }
         delete dialog;
         break;
+    case TOOL_START:
+        ele = pick_element(e->pos());
+        if(!ele || ele->type!=DRAG_STATE) break;
+
+        iniState = static_cast<DragState*>(ele);
+
+        break;
+    case TOOL_HALT:
+        ele = pick_element(e->pos());
+        if(!ele || ele->type!=DRAG_STATE) break;
+
+        static_cast<DragState*>(ele)->final = !static_cast<DragState*>(ele)->final;
+        break;
     default:
-        return;
+        break;
+    }
+
+    foreach(DragState *st, state){
+        if(container.left() > st->pos.x()-st->radius){
+            st->pos.setX(container.left()+(st->radius+10));
+        }else if(container.right() < st->pos.x()+st->radius){
+            st->pos.setX(container.right()-(st->radius+10));
+        }
+
+        if(container.top() > st->pos.y()-st->radius){
+            st->pos.setY(container.top()+(st->radius+10));
+        }else if(container.bottom() < st->pos.y()+st->radius){
+            st->pos.setY(container.bottom()-(st->radius+10));
+        }
     }
     this->repaint();
 }
@@ -259,7 +176,7 @@ void DragWidget::mouseMoveEvent(QMouseEvent *e)
     case TOOL_RENAME:
         break;
     default:
-        return;
+        break;
     }
     this->repaint();
 }
@@ -276,30 +193,154 @@ DragElement *DragWidget::pick_element(QPoint epos)
     return ele;
 }
 
+void DragWidget::renderScene(QPaintDevice *device)
+{
+    QPainter painter;
+    painter.begin(device);
+    painter.setRenderHint(QPainter::Antialiasing,true);
+    painter.setRenderHint(QPainter::TextAntialiasing,true);
+
+    //White Background
+    painter.setPen(Qt::NoPen);
+    painter.setBrush(Qt::white);
+    painter.drawRect(rect());
+
+    const float sint = sin(-30*M_PI/180);
+    const float cost = cos(-30*M_PI/180);
+
+    foreach(DragEdge *ed,edge){
+        if(ed->e1 && ed->e2){
+            if(ed->e1 != ed->e2){
+                painter.setBrush(Qt::NoBrush);
+                painter.setPen(QPen(Qt::black,2,Qt::SolidLine));
+                QVector2D v1(ed->e1->pos-ed->e2->pos);
+
+                v1.normalize();
+                QVector2D v2(ed->e2->pos-ed->e1->pos);
+                v2.normalize();
+                QPointF p[4];
+                p[0] = ed->e1->pos-(ed->e1->radius*v1.toPointF());
+                p[1] = ed->e2->pos-(ed->e2->radius*v2.toPointF());
+                painter.drawLine(p[0],p[1]);
+
+                painter.drawText(((p[0]+p[1])/2)+QPointF(0,-10),"HMM");
+
+                p[2] = p[1]+(10*QPointF(v1.x()*cost-v1.y()*sint,v1.x()*sint+v1.y()*cost));
+                p[3] = p[1]+(10*QPointF(v1.x()*cost-v1.y()*(-sint),v1.x()*(-sint)+v1.y()*cost));
+                painter.setBrush(Qt::black);
+                painter.drawPolygon(p+1,3);
+            }else{
+                painter.setPen(QPen(Qt::black,2,Qt::SolidLine));
+                painter.setBrush(Qt::NoBrush);
+                painter.drawEllipse(ed->e1->pos+QPointF(0,-30),20,30);
+                painter.drawText(ed->e1->pos+QPointF(0,-60),"HMM");
+
+                QPointF p[3];
+                p[0] = ed->e1->pos+QPointF(-20,-25);
+                p[1] = p[0]+(10*QPointF(+sint,-cost));
+                p[2] = p[0]+(10*QPointF(-sint,-cost));
+                painter.setBrush(Qt::black);
+                painter.drawPolygon(p,3);
+            }
+        }else{
+            delete ed;
+            edge.removeOne(ed);
+        }
+    }
+
+    foreach(DragState *el,state){
+        painter.setPen(Qt::NoPen);
+        painter.setBrush(Qt::yellow);
+        painter.drawEllipse(el->pos,el->radius,el->radius);
+
+        if(el == selected || selectedElements.contains(el)){
+            painter.setPen(QPen(Qt::cyan,4,Qt::SolidLine));
+        }else{
+            painter.setPen(QPen(Qt::black,2,Qt::SolidLine));
+        }
+        painter.setBrush(Qt::NoBrush);
+        painter.drawEllipse(el->pos,el->radius,el->radius);
+
+        if(iniState==el){
+            QPointF p[3];
+            painter.setBrush(Qt::white);
+            p[0] = el->pos+QPointF(-el->radius,0);
+            p[1] = el->pos+QPointF(-el->radius-20,20);
+            p[2] = el->pos+QPointF(-el->radius-20,-20);
+            painter.drawPolygon(p,3);
+        }
+
+        if(el->final){
+            painter.setBrush(Qt::NoBrush);
+            painter.setPen(QPen(Qt::black,2,Qt::SolidLine));
+            painter.drawEllipse(el->pos,el->radius-5,el->radius-5);
+        }
+
+        QRectF rect = QRectF(el->pos-QPointF(el->radius,el->radius),el->pos+QPointF(el->radius,el->radius));
+        painter.setPen(Qt::black);
+        painter.drawText(rect,el->txt,Qt::AlignVCenter|Qt::AlignHCenter);
+    }
+
+    painter.setBrush(Qt::NoBrush);
+    painter.setPen(QPen(Qt::gray,2,Qt::DashLine));
+    painter.drawRect(multipleSelectRect);
+
+    painter.end();
+}
+
+void DragWidget::exportSVG()
+{
+    QSvgGenerator svgGen;
+
+    svgGen.setFileName( "test.svg" );
+    svgGen.setSize(this->size());
+    svgGen.setViewBox(this->rect());
+    svgGen.setTitle(tr("SVG Test"));
+    svgGen.setDescription(tr(" Test "
+                             " Uh huh "));
+
+    renderScene(&svgGen);
+}
+
 void DragWidget::setCreateTool()
 {
     current_tool = TOOL_CREATE;
     selected = NULL;
-    this->setCursor(Qt::CrossCursor);
+    this->setCursor(QCursor(QPixmap("://create.svg"),0,0));
 }
 
 void DragWidget::setMoveTool()
 {
     current_tool = TOOL_MOVE;
     selected = NULL;
-    this->setCursor(Qt::OpenHandCursor);
+    this->setCursor(QCursor(QPixmap("://move.svg"),0,0));
 }
 
 void DragWidget::setLinkTool()
 {
     current_tool = TOOL_LINK;
     selected = NULL;
-    this->setCursor(Qt::SizeAllCursor);
+    this->setCursor(QCursor(QPixmap("://link.svg"),0,0));
 }
 
 void DragWidget::setRenameTool()
 {
     current_tool = TOOL_RENAME;
     selected = NULL;
-    this->setCursor(Qt::IBeamCursor);
+    this->setCursor(QCursor(QPixmap("://rename.svg"),0,0));
+}
+
+void DragWidget::setFirstTool()
+{
+    current_tool = TOOL_START;
+    selected = NULL;
+    this->setCursor(QCursor(QPixmap("://first.svg"),0,0));
+}
+
+void DragWidget::setHaltTool()
+{
+    current_tool = TOOL_HALT;
+    selected = NULL;
+    this->setCursor(QCursor(QPixmap("://halt.svg"),0,0));
+
 }

@@ -5,7 +5,11 @@
 #include <QRectF>
 #include <QString>
 
-enum DRAG_{DRAG_STATE,DRAG_EDGE};
+enum DRAG_{
+    DRAG_STATE,
+    DRAG_EDGE,
+    DRAG_TEXT
+};
 
 class DragElement{
 public:
