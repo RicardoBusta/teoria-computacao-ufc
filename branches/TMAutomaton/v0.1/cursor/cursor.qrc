@@ -1,0 +1,11 @@
+<RCC>
+    <qresource prefix="/">
+        <file>arrow.svg</file>
+        <file>create.svg</file>
+        <file>first.svg</file>
+        <file>halt.svg</file>
+        <file>link.svg</file>
+        <file>move.svg</file>
+        <file>rename.svg</file>
+    </qresource>
+</RCC>
