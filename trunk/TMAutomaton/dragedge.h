@@ -12,6 +12,8 @@ public:
     DragState *e1, *e2;
 
     bool pick(QPoint);
+    void render(QPainter *painter);
+    QRect boundingBox();
 };
 
 #endif // DRAGEDGE_H

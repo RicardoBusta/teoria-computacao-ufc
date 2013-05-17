@@ -1,10 +1,10 @@
 #include "dragtext.h"
 
-#include <QFontMetrics>
-#include <QFont>
-
-DragText::DragText()
+DragText::DragText(QPoint pos):
+    DragElement()
 {
+    this->pos = pos;
+    text = "HAHA";
 }
 
 bool DragText::pick(QPoint epos)
@@ -12,9 +12,16 @@ bool DragText::pick(QPoint epos)
     return false;
 }
 
-QRect DragText::textRect()
+void DragText::render(QPainter *painter)
 {
-    QFont font;
-    QFontMetrics fontmetrics(font);
-    return QRect(pos.x(),pos.y(),fontmetrics.width(text),fontmetrics.height());
+    if(selected){
+        painter->drawRect(boundingBox());
+    }
+    painter->setPen(Qt::black);
+    painter->drawText(pos,text);
+}
+
+QRect DragText::boundingBox()
+{
+    return QRect(pos,QSize(30,30));
 }

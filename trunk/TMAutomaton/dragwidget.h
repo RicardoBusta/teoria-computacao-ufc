@@ -14,7 +14,9 @@ enum DRAG_TOOLS{
     TOOL_LINK,
     TOOL_RENAME,
     TOOL_HALT,
-    TOOL_START
+    TOOL_START,
+    TOOL_DELETE,
+    TOOL_TEXT
 };
 
 class DragWidget : public QWidget
@@ -30,13 +32,11 @@ public:
     void mouseMoveEvent(QMouseEvent *);
 
     DragState *iniState;
-    QList<DragState*> state;
-    QList<DragEdge*> edge;
-    QList<DragText*> text;
+    QList<DragElement*> element;
     DragState *selected;
 
     DRAG_TOOLS current_tool;
-    QPointF anchor;
+    QPoint anchor;
     bool multipleSelect;
     QPoint mousePos;
     QRect multipleSelectRect;
@@ -49,6 +49,9 @@ public:
     DragElement *pick_element(QPoint epos);
 
     void renderScene(QPaintDevice *device);
+
+    void clearSelected();
+    void clearDragged();
 signals:
     
 public slots:
@@ -58,6 +61,8 @@ public slots:
     void setRenameTool();
     void setFirstTool();
     void setHaltTool();
+    void setAddTextTool();
+    void setDeleteTool();
 
     void exportSVG();
 };

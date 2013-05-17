@@ -8,14 +8,17 @@ class DragState : public DragElement
 public:
     DragState();
 
-    DragState(QPointF pos);
+    DragState(QPoint pos);
 
-    float radius;
+    int radius;
     QString txt;
 
     bool final;
+    bool initial;
 
     bool pick(QPoint epos);
+    void render(QPainter *painter);
+    QRect boundingBox();
 };
 
 #endif // DRAGSTATE_H

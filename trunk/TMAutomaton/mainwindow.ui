@@ -16,139 +16,6 @@
   <widget class="QWidget" name="centralWidget">
    <layout class="QVBoxLayout" name="verticalLayout">
     <item>
-     <layout class="QHBoxLayout" name="horizontalLayout_2">
-      <item>
-       <widget class="QToolButton" name="toolButton_move">
-        <property name="toolTip">
-         <string>Move</string>
-        </property>
-        <property name="text">
-         <string>Move</string>
-        </property>
-        <property name="icon">
-         <iconset resource="cursor/cursor.qrc">
-          <normaloff>:/move.svg</normaloff>:/move.svg</iconset>
-        </property>
-        <property name="iconSize">
-         <size>
-          <width>30</width>
-          <height>30</height>
-         </size>
-        </property>
-        <property name="checkable">
-         <bool>false</bool>
-        </property>
-        <property name="checked">
-         <bool>false</bool>
-        </property>
-       </widget>
-      </item>
-      <item>
-       <widget class="QToolButton" name="toolButton_create">
-        <property name="toolTip">
-         <string>Create</string>
-        </property>
-        <property name="text">
-         <string>Create</string>
-        </property>
-        <property name="icon">
-         <iconset resource="cursor/cursor.qrc">
-          <normaloff>:/create.svg</normaloff>:/create.svg</iconset>
-        </property>
-        <property name="iconSize">
-         <size>
-          <width>30</width>
-          <height>30</height>
-         </size>
-        </property>
-        <property name="checkable">
-         <bool>false</bool>
-        </property>
-       </widget>
-      </item>
-      <item>
-       <widget class="QToolButton" name="toolButton_link">
-        <property name="toolTip">
-         <string>Link</string>
-        </property>
-        <property name="text">
-         <string>Link</string>
-        </property>
-        <property name="icon">
-         <iconset resource="cursor/cursor.qrc">
-          <normaloff>:/link.svg</normaloff>:/link.svg</iconset>
-        </property>
-        <property name="iconSize">
-         <size>
-          <width>30</width>
-          <height>30</height>
-         </size>
-        </property>
-       </widget>
-      </item>
-      <item>
-       <widget class="QToolButton" name="toolButton_final">
-        <property name="toolTip">
-         <string>Halt</string>
-        </property>
-        <property name="text">
-         <string>Toggle Final</string>
-        </property>
-        <property name="icon">
-         <iconset resource="cursor/cursor.qrc">
-          <normaloff>:/halt.svg</normaloff>:/halt.svg</iconset>
-        </property>
-        <property name="iconSize">
-         <size>
-          <width>30</width>
-          <height>30</height>
-         </size>
-        </property>
-       </widget>
-      </item>
-      <item>
-       <widget class="QToolButton" name="toolButton_start">
-        <property name="toolTip">
-         <string>Start</string>
-        </property>
-        <property name="text">
-         <string>Set Start</string>
-        </property>
-        <property name="icon">
-         <iconset resource="cursor/cursor.qrc">
-          <normaloff>:/first.svg</normaloff>:/first.svg</iconset>
-        </property>
-        <property name="iconSize">
-         <size>
-          <width>30</width>
-          <height>30</height>
-         </size>
-        </property>
-       </widget>
-      </item>
-      <item>
-       <widget class="QToolButton" name="toolButton_rename">
-        <property name="toolTip">
-         <string>Rename</string>
-        </property>
-        <property name="text">
-         <string>Rename</string>
-        </property>
-        <property name="icon">
-         <iconset resource="cursor/cursor.qrc">
-          <normaloff>:/rename.svg</normaloff>:/rename.svg</iconset>
-        </property>
-        <property name="iconSize">
-         <size>
-          <width>30</width>
-          <height>30</height>
-         </size>
-        </property>
-       </widget>
-      </item>
-     </layout>
-    </item>
-    <item>
      <widget class="QScrollArea" name="scrollArea">
       <property name="widgetResizable">
        <bool>true</bool>
@@ -159,7 +26,7 @@
          <x>0</x>
          <y>0</y>
          <width>548</width>
-         <height>351</height>
+         <height>320</height>
         </rect>
        </property>
       </widget>
@@ -186,12 +53,31 @@
    <addaction name="menuFile"/>
   </widget>
   <widget class="QToolBar" name="mainToolBar">
+   <property name="iconSize">
+    <size>
+     <width>60</width>
+     <height>60</height>
+    </size>
+   </property>
+   <property name="toolButtonStyle">
+    <enum>Qt::ToolButtonTextUnderIcon</enum>
+   </property>
    <attribute name="toolBarArea">
     <enum>TopToolBarArea</enum>
    </attribute>
    <attribute name="toolBarBreak">
     <bool>false</bool>
    </attribute>
+   <addaction name="actionMove_Select"/>
+   <addaction name="actionCreate_State"/>
+   <addaction name="actionAdd_Text"/>
+   <addaction name="actionDelete"/>
+   <addaction name="actionCreate_Transition"/>
+   <addaction name="separator"/>
+   <addaction name="actionFinal_State"/>
+   <addaction name="actionInitial_State"/>
+   <addaction name="separator"/>
+   <addaction name="actionEdit_Text"/>
   </widget>
   <widget class="QStatusBar" name="statusBar"/>
   <action name="actionExit">
@@ -202,6 +88,102 @@
   <action name="actionSave_SVG">
    <property name="text">
     <string>Save SVG</string>
+   </property>
+  </action>
+  <action name="actionMove_Select">
+   <property name="icon">
+    <iconset resource="cursor/cursor.qrc">
+     <normaloff>:/move.svg</normaloff>:/move.svg</iconset>
+   </property>
+   <property name="text">
+    <string>Move/Select</string>
+   </property>
+   <property name="toolTip">
+    <string>Move/Select</string>
+   </property>
+  </action>
+  <action name="actionCreate_State">
+   <property name="icon">
+    <iconset resource="cursor/cursor.qrc">
+     <normaloff>:/create.svg</normaloff>:/create.svg</iconset>
+   </property>
+   <property name="text">
+    <string>Create State</string>
+   </property>
+   <property name="toolTip">
+    <string>Create State</string>
+   </property>
+  </action>
+  <action name="actionCreate_Transition">
+   <property name="icon">
+    <iconset resource="cursor/cursor.qrc">
+     <normaloff>:/link.svg</normaloff>:/link.svg</iconset>
+   </property>
+   <property name="text">
+    <string>Create Transition</string>
+   </property>
+   <property name="toolTip">
+    <string>Create Transition</string>
+   </property>
+  </action>
+  <action name="actionFinal_State">
+   <property name="icon">
+    <iconset resource="cursor/cursor.qrc">
+     <normaloff>:/halt.svg</normaloff>:/halt.svg</iconset>
+   </property>
+   <property name="text">
+    <string>Final State</string>
+   </property>
+   <property name="toolTip">
+    <string>Toggle Final State</string>
+   </property>
+  </action>
+  <action name="actionInitial_State">
+   <property name="icon">
+    <iconset resource="cursor/cursor.qrc">
+     <normaloff>:/first.svg</normaloff>:/first.svg</iconset>
+   </property>
+   <property name="text">
+    <string>Initial State</string>
+   </property>
+   <property name="toolTip">
+    <string>Initial State</string>
+   </property>
+  </action>
+  <action name="actionEdit_Text">
+   <property name="icon">
+    <iconset resource="cursor/cursor.qrc">
+     <normaloff>:/rename.svg</normaloff>:/rename.svg</iconset>
+   </property>
+   <property name="text">
+    <string>Edit Text</string>
+   </property>
+   <property name="toolTip">
+    <string>Edit Text</string>
+   </property>
+  </action>
+  <action name="actionAdd_Text">
+   <property name="icon">
+    <iconset resource="cursor/cursor.qrc">
+     <normaloff>:/text.svg</normaloff>:/text.svg</iconset>
+   </property>
+   <property name="text">
+    <string>Add Text</string>
+   </property>
+   <property name="toolTip">
+    <string>Add Text</string>
+   </property>
+  </action>
+  <action name="actionDelete">
+   <property name="icon">
+    <iconset resource="cursor/cursor.qrc">
+     <normaloff>:/delete.svg</normaloff>:/delete.svg</iconset>
+   </property>
+   <property name="text">
+    <string>Delete Element</string>
+   </property>
+   <property name="toolTip">
+    <string>Delete</string>
    </property>
   </action>
  </widget>

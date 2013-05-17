@@ -8,21 +8,18 @@ MainWindow::MainWindow(QWidget *parent) :
 {
     ui->setupUi(this);
 
-    ui->mainToolBar->addWidget(ui->toolButton_move);
-    ui->mainToolBar->addWidget(ui->toolButton_create);
-    ui->mainToolBar->addWidget(ui->toolButton_link);
-    ui->mainToolBar->addWidget(ui->toolButton_rename);
-    ui->mainToolBar->addWidget(ui->toolButton_start);
-    ui->mainToolBar->addWidget(ui->toolButton_final);
-
     connect(ui->actionExit,SIGNAL(triggered()),this,SLOT(close()));
 
-    connect(ui->toolButton_create,SIGNAL(clicked()),ui->widget,SLOT(setCreateTool()));
-    connect(ui->toolButton_move,SIGNAL(clicked()),ui->widget,SLOT(setMoveTool()));
-    connect(ui->toolButton_link,SIGNAL(clicked()),ui->widget,SLOT(setLinkTool()));
-    connect(ui->toolButton_rename,SIGNAL(clicked()),ui->widget,SLOT(setRenameTool()));
-    connect(ui->toolButton_start,SIGNAL(clicked()),ui->widget,SLOT(setFirstTool()));
-    connect(ui->toolButton_final,SIGNAL(clicked()),ui->widget,SLOT(setHaltTool()));
+    ui->widget->setMoveTool();
+
+    connect(ui->actionCreate_State,SIGNAL(triggered()),ui->widget,SLOT(setCreateTool()));
+    connect(ui->actionMove_Select,SIGNAL(triggered()),ui->widget,SLOT(setMoveTool()));
+    connect(ui->actionCreate_Transition,SIGNAL(triggered()),ui->widget,SLOT(setLinkTool()));
+    connect(ui->actionEdit_Text,SIGNAL(triggered()),ui->widget,SLOT(setRenameTool()));
+    connect(ui->actionInitial_State,SIGNAL(triggered()),ui->widget,SLOT(setFirstTool()));
+    connect(ui->actionFinal_State,SIGNAL(triggered()),ui->widget,SLOT(setHaltTool()));
+    connect(ui->actionAdd_Text,SIGNAL(triggered()),ui->widget,SLOT(setAddTextTool()));
+    connect(ui->actionDelete,SIGNAL(triggered()),ui->widget,SLOT(setDeleteTool()));
 
     connect(ui->actionSave_SVG,SIGNAL(triggered()),ui->widget,SLOT(exportSVG()));
 }

@@ -7,5 +7,7 @@
         <file>link.svg</file>
         <file>move.svg</file>
         <file>rename.svg</file>
+        <file>delete.svg</file>
+        <file>text.svg</file>
     </qresource>
 </RCC>
