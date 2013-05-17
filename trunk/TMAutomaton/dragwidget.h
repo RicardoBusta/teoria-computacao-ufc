@@ -6,8 +6,16 @@
 #include "dragelement.h"
 #include "dragedge.h"
 #include "dragstate.h"
+#include "dragtext.h"
 
-enum DRAG_TOOLS{TOOL_CREATE,TOOL_MOVE,TOOL_LINK,TOOL_RENAME};
+enum DRAG_TOOLS{
+    TOOL_CREATE,
+    TOOL_MOVE,
+    TOOL_LINK,
+    TOOL_RENAME,
+    TOOL_HALT,
+    TOOL_START
+};
 
 class DragWidget : public QWidget
 {
@@ -24,6 +32,7 @@ public:
     DragState *iniState;
     QList<DragState*> state;
     QList<DragEdge*> edge;
+    QList<DragText*> text;
     DragState *selected;
 
     DRAG_TOOLS current_tool;
@@ -38,6 +47,8 @@ public:
     QList<DragElement*> selectedElements;
 
     DragElement *pick_element(QPoint epos);
+
+    void renderScene(QPaintDevice *device);
 signals:
     
 public slots:
@@ -45,6 +56,10 @@ public slots:
     void setMoveTool();
     void setLinkTool();
     void setRenameTool();
+    void setFirstTool();
+    void setHaltTool();
+
+    void exportSVG();
 };
 
 #endif // DRAGWIDGET_H

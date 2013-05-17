@@ -17,12 +17,18 @@ SOURCES += main.cpp\
     dragwidget.cpp \
     dragelement.cpp \
     dragedge.cpp \
-    dragstate.cpp
+    dragstate.cpp \
+    dragtext.cpp
 
 HEADERS  += mainwindow.h \
     dragwidget.h \
     dragelement.h \
     dragedge.h \
-    dragstate.h
+    dragstate.h \
+    staticresource.h \
+    dragtext.h
 
 FORMS    += mainwindow.ui
+
+RESOURCES += \
+    cursor/cursor.qrc
