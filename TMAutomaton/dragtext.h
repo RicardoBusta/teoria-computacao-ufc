@@ -8,13 +8,13 @@
 class DragText : public DragElement
 {
 public:
-    DragText();
+    DragText(QPoint pos);
 
     QString text;
 
     bool pick(QPoint epos);
-
-    QRect textRect();
+    void render(QPainter *painter);
+    QRect boundingBox();
 };
 
 #endif // DRAGTEXT_H

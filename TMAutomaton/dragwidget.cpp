@@ -27,21 +27,19 @@ void DragWidget::mousePressEvent(QMouseEvent *e)
     DragElement *ele;
 
     switch(current_tool){
-    case TOOL_CREATE:
-
-        break;
     case TOOL_MOVE:
         ele = pick_element(e->pos());
         if(ele && ele->type==DRAG_STATE){
             selected = dynamic_cast<DragState*>(ele);
+            selected->dragged = true;
         }
         if(!selected){
-            selectedElements.clear();
+            clearSelected();
             multipleSelect = true;
             mousePos = e->pos();
         }
         if(!selectedElements.contains(selected)){
-            selectedElements.clear();
+            clearSelected();
             mousePos = e->pos();
         }
 
@@ -51,7 +49,7 @@ void DragWidget::mousePressEvent(QMouseEvent *e)
         if(selected){
             DragState *sel2 = dynamic_cast<DragState*>(pick_element(e->pos()));
             //            if(selected!=sel2){
-            edge.push_back(new DragEdge(selected,sel2));
+            element.push_back(new DragEdge(selected,sel2));
             selected = NULL;
             //            }
         }else{
@@ -78,12 +76,12 @@ void DragWidget::mouseReleaseEvent(QMouseEvent *e)
 
     switch(current_tool){
     case TOOL_CREATE:
-        state.push_back(new DragState(e->pos()));
+        element.push_back(new DragState(e->pos()));
         break;
     case TOOL_MOVE:
         multipleSelect = false;
         multipleSelectRect.setRect(0,0,0,0);
-        selected = NULL;
+        clearDragged();
         break;
     case TOOL_RENAME:
         ele = pick_element(e->pos());
@@ -118,22 +116,14 @@ void DragWidget::mouseReleaseEvent(QMouseEvent *e)
 
         static_cast<DragState*>(ele)->final = !static_cast<DragState*>(ele)->final;
         break;
+    case TOOL_TEXT:
+        element.push_back(new DragText(e->pos()));
     default:
         break;
     }
 
-    foreach(DragState *st, state){
-        if(container.left() > st->pos.x()-st->radius){
-            st->pos.setX(container.left()+(st->radius+10));
-        }else if(container.right() < st->pos.x()+st->radius){
-            st->pos.setX(container.right()-(st->radius+10));
-        }
+    foreach(DragElement *el, element){
 
-        if(container.top() > st->pos.y()-st->radius){
-            st->pos.setY(container.top()+(st->radius+10));
-        }else if(container.bottom() < st->pos.y()+st->radius){
-            st->pos.setY(container.bottom()-(st->radius+10));
-        }
     }
     this->repaint();
 }
@@ -142,26 +132,26 @@ void DragWidget::mouseReleaseEvent(QMouseEvent *e)
 void DragWidget::mouseMoveEvent(QMouseEvent *e)
 {
     switch(current_tool){
-    case TOOL_CREATE:
-        break;
     case TOOL_MOVE:
         if(multipleSelect){
             multipleSelectRect = QRect( QPoint( qMin(mousePos.x(),e->pos().x()),qMin( mousePos.y(),e->pos().y()) ), QPoint( qMax(mousePos.x(),e->pos().x()),qMax(mousePos.y(),e->pos().y()) ) );
-            foreach(DragState* el, state){
+            foreach(DragElement* el, element){
                 if( el->pos.x() < multipleSelectRect.right() && el->pos.x() > multipleSelectRect.left() && el->pos.y() > multipleSelectRect.top() && el->pos.y() < multipleSelectRect.bottom() ){
                     if(!selectedElements.contains(el)){
                         selectedElements.push_back(el);
+                        el->selected=true;
                     }
                 }else{
                     if(selectedElements.contains(el)){
                         selectedElements.removeOne(el);
+                        el->selected=false;
                     }
                 }
             }
         }
         if(!multipleSelect && !selectedElements.empty()){
             foreach(DragElement* el,selectedElements){
-                if(el!=selected){
+                if(el->selected){
                     el->pos = el->pos + (e->pos()-mousePrev);
                 }
             }
@@ -170,10 +160,6 @@ void DragWidget::mouseMoveEvent(QMouseEvent *e)
         if(selected){
             selected->pos = e->pos() - anchor;
         }
-        break;
-    case TOOL_LINK:
-        break;
-    case TOOL_RENAME:
         break;
     default:
         break;
@@ -184,7 +170,7 @@ void DragWidget::mouseMoveEvent(QMouseEvent *e)
 DragElement *DragWidget::pick_element(QPoint epos)
 {
     DragElement *ele = NULL;
-    foreach(DragState *el,state){
+    foreach(DragElement *el,element){
         if(el->pick(epos)){
             anchor = epos-el->pos;
             ele = el;
@@ -205,87 +191,30 @@ void DragWidget::renderScene(QPaintDevice *device)
     painter.setBrush(Qt::white);
     painter.drawRect(rect());
 
-    const float sint = sin(-30*M_PI/180);
-    const float cost = cos(-30*M_PI/180);
-
-    foreach(DragEdge *ed,edge){
-        if(ed->e1 && ed->e2){
-            if(ed->e1 != ed->e2){
-                painter.setBrush(Qt::NoBrush);
-                painter.setPen(QPen(Qt::black,2,Qt::SolidLine));
-                QVector2D v1(ed->e1->pos-ed->e2->pos);
-
-                v1.normalize();
-                QVector2D v2(ed->e2->pos-ed->e1->pos);
-                v2.normalize();
-                QPointF p[4];
-                p[0] = ed->e1->pos-(ed->e1->radius*v1.toPointF());
-                p[1] = ed->e2->pos-(ed->e2->radius*v2.toPointF());
-                painter.drawLine(p[0],p[1]);
-
-                painter.drawText(((p[0]+p[1])/2)+QPointF(0,-10),"HMM");
-
-                p[2] = p[1]+(10*QPointF(v1.x()*cost-v1.y()*sint,v1.x()*sint+v1.y()*cost));
-                p[3] = p[1]+(10*QPointF(v1.x()*cost-v1.y()*(-sint),v1.x()*(-sint)+v1.y()*cost));
-                painter.setBrush(Qt::black);
-                painter.drawPolygon(p+1,3);
-            }else{
-                painter.setPen(QPen(Qt::black,2,Qt::SolidLine));
-                painter.setBrush(Qt::NoBrush);
-                painter.drawEllipse(ed->e1->pos+QPointF(0,-30),20,30);
-                painter.drawText(ed->e1->pos+QPointF(0,-60),"HMM");
-
-                QPointF p[3];
-                p[0] = ed->e1->pos+QPointF(-20,-25);
-                p[1] = p[0]+(10*QPointF(+sint,-cost));
-                p[2] = p[0]+(10*QPointF(-sint,-cost));
-                painter.setBrush(Qt::black);
-                painter.drawPolygon(p,3);
-            }
-        }else{
-            delete ed;
-            edge.removeOne(ed);
-        }
-    }
-
-    foreach(DragState *el,state){
-        painter.setPen(Qt::NoPen);
-        painter.setBrush(Qt::yellow);
-        painter.drawEllipse(el->pos,el->radius,el->radius);
-
-        if(el == selected || selectedElements.contains(el)){
-            painter.setPen(QPen(Qt::cyan,4,Qt::SolidLine));
-        }else{
-            painter.setPen(QPen(Qt::black,2,Qt::SolidLine));
-        }
-        painter.setBrush(Qt::NoBrush);
-        painter.drawEllipse(el->pos,el->radius,el->radius);
-
-        if(iniState==el){
-            QPointF p[3];
-            painter.setBrush(Qt::white);
-            p[0] = el->pos+QPointF(-el->radius,0);
-            p[1] = el->pos+QPointF(-el->radius-20,20);
-            p[2] = el->pos+QPointF(-el->radius-20,-20);
-            painter.drawPolygon(p,3);
-        }
-
-        if(el->final){
-            painter.setBrush(Qt::NoBrush);
-            painter.setPen(QPen(Qt::black,2,Qt::SolidLine));
-            painter.drawEllipse(el->pos,el->radius-5,el->radius-5);
-        }
-
-        QRectF rect = QRectF(el->pos-QPointF(el->radius,el->radius),el->pos+QPointF(el->radius,el->radius));
-        painter.setPen(Qt::black);
-        painter.drawText(rect,el->txt,Qt::AlignVCenter|Qt::AlignHCenter);
+    foreach(DragElement *ed,element){
+        ed->render(&painter);
     }
 
     painter.setBrush(Qt::NoBrush);
-    painter.setPen(QPen(Qt::gray,2,Qt::DashLine));
+    painter.setPen(QPen(Qt::lightGray,2,Qt::DashLine));
     painter.drawRect(multipleSelectRect);
 
     painter.end();
+}
+
+void DragWidget::clearSelected()
+{
+    while(!selectedElements.empty()){
+        selectedElements.takeFirst()->selected = false;
+    }
+}
+
+void DragWidget::clearDragged()
+{
+    if(selected){
+        selected->dragged = false;
+        selected = NULL;
+    }
 }
 
 void DragWidget::exportSVG()
@@ -305,42 +234,71 @@ void DragWidget::exportSVG()
 void DragWidget::setCreateTool()
 {
     current_tool = TOOL_CREATE;
-    selected = NULL;
+    clearDragged();
+    clearSelected();
     this->setCursor(QCursor(QPixmap("://create.svg"),0,0));
+    this->repaint();
 }
 
 void DragWidget::setMoveTool()
 {
     current_tool = TOOL_MOVE;
-    selected = NULL;
+    clearDragged();
+    clearSelected();
     this->setCursor(QCursor(QPixmap("://move.svg"),0,0));
+    this->repaint();
 }
 
 void DragWidget::setLinkTool()
 {
     current_tool = TOOL_LINK;
-    selected = NULL;
+    clearDragged();
+    clearSelected();
     this->setCursor(QCursor(QPixmap("://link.svg"),0,0));
+    this->repaint();
 }
 
 void DragWidget::setRenameTool()
 {
     current_tool = TOOL_RENAME;
-    selected = NULL;
+    clearDragged();
+    clearSelected();
     this->setCursor(QCursor(QPixmap("://rename.svg"),0,0));
+    this->repaint();
 }
 
 void DragWidget::setFirstTool()
 {
     current_tool = TOOL_START;
-    selected = NULL;
+    clearDragged();
+    clearSelected();
     this->setCursor(QCursor(QPixmap("://first.svg"),0,0));
+    this->repaint();
 }
 
 void DragWidget::setHaltTool()
 {
     current_tool = TOOL_HALT;
-    selected = NULL;
+    clearDragged();
+    clearSelected();
     this->setCursor(QCursor(QPixmap("://halt.svg"),0,0));
+    this->repaint();
+}
 
+void DragWidget::setAddTextTool()
+{
+    current_tool = TOOL_TEXT;
+    clearDragged();
+    clearSelected();
+    this->setCursor(QCursor(QPixmap("://text.svg"),0,0));
+    this->repaint();
+}
+
+void DragWidget::setDeleteTool()
+{
+    current_tool = TOOL_DELETE;
+    clearDragged();
+    clearSelected();
+    this->setCursor(QCursor(QPixmap("://delete.svg"),0,0));
+    this->repaint();
 }
