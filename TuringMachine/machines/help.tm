@@ -1,3 +1,0 @@
-#name HELP
-
-//HELP MACHINE
