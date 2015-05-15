@@ -1,0 +1,1 @@
+Implementações de Maquina de Turing e talvez outros trabalhos para a disciplina de Teoria da Computação.
